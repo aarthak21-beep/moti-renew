@@ -53,16 +53,24 @@ export const LocalSecurityGate: React.FC<{ children: React.ReactNode }> = ({ chi
   if (authLoading) return <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-600 dark:bg-slate-950 dark:text-slate-300">Loading...</div>;
   if (stage === 'ready') return <>{children}</>;
 
-  const inputClass = 'w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-center text-lg tracking-[0.25em] text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white';
-  const buttonClass = 'w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-700 disabled:opacity-50';
+  const inputClass = 'w-full rounded-xl border border-slate-200 bg-slate-50/90 px-4 py-3.5 text-center text-lg tracking-[0.25em] text-slate-900 outline-none transition focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/15 dark:border-slate-700 dark:bg-slate-800/80 dark:text-white dark:focus:bg-slate-800';
+  const buttonClass = 'w-full rounded-xl bg-gradient-to-r from-teal-700 to-emerald-500 px-4 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-teal-600/20 transition hover:from-teal-800 hover:to-emerald-600 disabled:cursor-not-allowed disabled:opacity-50';
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4 py-8 dark:bg-slate-950">
-      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-800 dark:bg-slate-900">
-        <div className="mb-5 text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-2xl dark:bg-blue-950">🔐</div>
-          <h1 className="text-xl font-bold text-slate-900 dark:text-white">MOTI Renew Security</h1>
-          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Your data is encrypted and securely stored on this device.</p>
+    <div className="min-h-screen flex items-center justify-center bg-[radial-gradient(ellipse_at_top_left,_#ccfbf1_0%,_#f0fdfa_32%,_#f8fafc_72%)] px-4 py-8 dark:bg-[radial-gradient(ellipse_at_top_left,_#134e4a_0%,_#0f172a_55%,_#020617_100%)]">
+      <div className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-white bg-white/95 p-7 shadow-[0_28px_90px_-25px_rgba(15,118,110,0.38)] backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/95 sm:p-8">
+        <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-teal-500 via-cyan-400 to-emerald-400" />
+        <div className="mb-7 flex items-center gap-3 border-b border-slate-100 pb-5 dark:border-slate-800">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-600 to-emerald-400 text-sm font-black text-white shadow-lg shadow-teal-600/25 ring-4 ring-teal-50 dark:ring-teal-950">MR</div>
+          <div className="text-left">
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-teal-600 dark:text-teal-400">MOTI TECHNOLOGIES</p>
+            <h1 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">MOTI Renew</h1>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">Your renewals, under control.</p>
+          </div>
+        </div>
+        <div className="mb-6 text-center">
+          <p className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">Secure access, <span className="bg-gradient-to-r from-teal-600 to-emerald-400 bg-clip-text text-transparent">made simple.</span></p>
+          <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">Your data is encrypted and securely stored on this device.</p>
         </div>
 
         {stage === 'setup' && (
@@ -80,7 +88,7 @@ export const LocalSecurityGate: React.FC<{ children: React.ReactNode }> = ({ chi
             <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100">Enter your PIN to unlock the app</h2>
             <input aria-label="PIN" className={inputClass} type="password" inputMode="numeric" autoComplete="current-password" maxLength={12} placeholder="Your PIN" value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, '').slice(0, 12))} onKeyDown={e => e.key === 'Enter' && void handleUnlock()} />
             <button className={buttonClass} disabled={busy || pin.length < 6} onClick={handleUnlock}>{busy ? 'Verifying…' : 'Unlock'}</button>
-            <button className="w-full py-2 text-xs font-semibold text-blue-600 dark:text-blue-400" onClick={() => { resetFields(); setStage('recover'); }}>Forgot PIN? Use Recovery Key</button>
+            <button className="w-full py-2 text-xs font-semibold text-teal-700 dark:text-teal-400" onClick={() => { resetFields(); setStage('recover'); }}>Forgot PIN? Use Recovery Key</button>
           </div>
         )}
 
@@ -105,7 +113,10 @@ export const LocalSecurityGate: React.FC<{ children: React.ReactNode }> = ({ chi
         )}
 
         {error && <p role="alert" className="mt-4 rounded-lg bg-red-50 p-3 text-xs text-red-700 dark:bg-red-950/40 dark:text-red-300">{error}</p>}
-        <p className="mt-5 text-center text-[10px] text-slate-400">Never share your PIN or Recovery Key with anyone.</p>
+        <div className="mt-7 border-t border-slate-100 pt-5 text-center dark:border-slate-800">
+          <p className="text-[10px] font-medium tracking-wide text-slate-400">Never share your PIN or Recovery Key with anyone.</p>
+          <p className="mt-2 text-[10px] font-medium tracking-wide text-slate-400">Developed by <span className="font-extrabold text-slate-600 dark:text-slate-300">MOTI TECHNOLOGIES</span></p>
+        </div>
       </div>
     </div>
   );
