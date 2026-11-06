@@ -71,19 +71,24 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const load = async () => {
       setLoading(true);
       if (isRealUser && user) {
-        const [subs, pays, acts] = await Promise.all([
-          tablesDB.listRows(APPWRITE_DATABASE_ID, APPWRITE_TABLES.subscriptions, [Query.equal('userId', user.uid), Query.limit(100)]),
-          tablesDB.listRows(APPWRITE_DATABASE_ID, APPWRITE_TABLES.payments, [Query.equal('userId', user.uid), Query.limit(100)]),
-          tablesDB.listRows(APPWRITE_DATABASE_ID, APPWRITE_TABLES.activities, [Query.equal('userId', user.uid), Query.limit(100)]),
-        ]);
-        const unpack = (rows: any[]) => rows.map(row => {
-          try { return typeof row.data === 'string' ? JSON.parse(row.data) : row.data; }
-          catch { console.error('Could not parse an Appwrite data row:', row.$id); return null; }
-        }).filter(Boolean);
-        if (!cancelled) {
-          setSubscriptions(unpack(subs.rows) as Subscription[]);
-          setPayments(unpack(pays.rows) as PaymentRecord[]);
-          setActivities(unpack(acts.rows) as ActivityLog[]);
+        try {
+          const [subs, pays, acts] = await Promise.all([
+            tablesDB.listRows(APPWRITE_DATABASE_ID, APPWRITE_TABLES.subscriptions, [Query.equal('userId', user.uid), Query.limit(100)]),
+            tablesDB.listRows(APPWRITE_DATABASE_ID, APPWRITE_TABLES.payments, [Query.equal('userId', user.uid), Query.limit(100)]),
+            tablesDB.listRows(APPWRITE_DATABASE_ID, APPWRITE_TABLES.activities, [Query.equal('userId', user.uid), Query.limit(100)]),
+          ]);
+          const unpack = (rows: any[]) => rows.map(row => {
+            try { return typeof row.data === 'string' ? JSON.parse(row.data) : row.data; }
+            catch { console.error('Could not parse an Appwrite data row:', row.$id); return null; }
+          }).filter(Boolean);
+          if (!cancelled) {
+            setSubscriptions(unpack(subs.rows) as Subscription[]);
+            setPayments(unpack(pays.rows) as PaymentRecord[]);
+            setActivities(unpack(acts.rows) as ActivityLog[]);
+          }
+        } catch (error) {
+          console.error('Appwrite data load failed:', error);
+          if (!cancelled) { setSubscriptions([]); setPayments([]); setActivities([]); }
         }
       } else {
         const saved = localStorage.getItem(`moti_renew_data_${currentUserId}`);
