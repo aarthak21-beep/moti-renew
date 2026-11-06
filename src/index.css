@@ -34,3 +34,84 @@
 .animate-pulse-subtle {
   animation: pulse-subtle 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+
+/* MOTI Renew — refined visual foundation */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    min-height: 100vh;
+    background: #f5f7fc;
+    color: #172033;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  button, input, select, textarea {
+    font: inherit;
+  }
+
+  button {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button:focus-visible, a:focus-visible, input:focus-visible,
+  select:focus-visible, textarea:focus-visible {
+    outline: 3px solid rgba(59, 130, 246, 0.35);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: rgba(59, 130, 246, 0.18);
+  }
+}
+
+@layer components {
+  main .rounded-2xl.border,
+  main .rounded-xl.border {
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.035),
+                0 8px 24px rgba(15, 23, 42, 0.025);
+    transition: border-color 180ms ease, box-shadow 180ms ease,
+                transform 180ms ease;
+  }
+
+  main .rounded-2xl.border:hover {
+    box-shadow: 0 8px 28px rgba(15, 23, 42, 0.065);
+  }
+
+  main button {
+    transition: background-color 160ms ease, color 160ms ease,
+                border-color 160ms ease, box-shadow 160ms ease,
+                transform 160ms ease;
+  }
+
+  main button:active {
+    transform: translateY(1px);
+  }
+
+  main input:not([type="checkbox"]):not([type="radio"]),
+  main select,
+  main textarea {
+    min-height: 40px;
+    border-radius: 12px;
+  }
+}
+
+.dark body {
+  background: #080f1e;
+  color: #e2e8f0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
