@@ -16,7 +16,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { translations, Language } from '../i18n/translations';
 import { Currency } from '../types';
-import { readSecureData, writeSecureData } from '../lib/secureStorage';
+import { exportEncryptedBackup, restoreEncryptedBackup } from '../lib/secureStorage';
 
 export const SettingsView: React.FC = () => {
   const { user, updateProfile } = useAuth();
@@ -71,28 +71,14 @@ export const SettingsView: React.FC = () => {
           <h2 className="text-sm font-bold text-slate-900 dark:text-white">Backup & Restore</h2>
         </div>
         <p className="text-xs text-slate-500 dark:text-slate-400">
-          Export your subscriptions, payment history and activity as a file. Keep the file somewhere safe. Restore replaces the current records on this device.
+          Backup PIN/Recovery Key ने encrypted असतो. Restore करताना त्याच Backup चा PIN किंवा Recovery Key आवश्यक आहे.
         </p>
         <div className="flex flex-wrap gap-3">
           <button
             type="button"
             onClick={async () => {
               const userId = user?.uid || 'usr_moti_demo_01';
-              const raw = await readSecureData<{ subscriptions?: unknown[]; payments?: unknown[]; activities?: unknown[] }>(userId);
-              let data: { subscriptions: unknown[]; payments: unknown[]; activities: unknown[] } = { subscriptions: [], payments: [], activities: [] };
-              if (raw) {
-                data = {
-                  subscriptions: Array.isArray(raw.subscriptions) ? raw.subscriptions : [],
-                  payments: Array.isArray(raw.payments) ? raw.payments : [],
-                  activities: Array.isArray(raw.activities) ? raw.activities : [],
-                };
-              }
-              const backup = {
-                app: 'MOTI Renew',
-                formatVersion: 1,
-                createdAt: new Date().toISOString(),
-                data,
-              };
+              const backup = await exportEncryptedBackup(userId);
               const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
               const url = URL.createObjectURL(blob);
               const link = document.createElement('a');
@@ -129,16 +115,15 @@ export const SettingsView: React.FC = () => {
               }
               try {
                 const parsed = JSON.parse(await file.text());
-                const data = parsed?.data;
-                if (parsed?.app !== 'MOTI Renew' || parsed?.formatVersion !== 1 ||
-                    !data || !Array.isArray(data.subscriptions) ||
-                    !Array.isArray(data.payments) || !Array.isArray(data.activities)) {
-                  throw new Error('This is not a supported MOTI Renew backup file.');
+                if (parsed?.app !== 'MOTI Renew' || parsed?.formatVersion !== 2) {
+                  throw new Error('हा जुना किंवा असुरक्षित Backup आहे. नवीन encrypted Backup वापरा.');
                 }
-                if (!window.confirm('Restore this backup? Your current subscriptions, payments and activity on this device will be replaced.')) return;
+                if (!window.confirm('हा Backup Restore केल्यास सध्याचा डेटा बदलला जाईल. पुढे जायचे?')) return;
+                const secret = window.prompt('या Backup चा PIN किंवा Recovery Key टाका:');
+                if (!secret) return;
                 const userId = user?.uid || 'usr_moti_demo_01';
-                await writeSecureData(userId, data);
-                alert('Backup restored. The app will now reload.');
+                await restoreEncryptedBackup(userId, parsed, secret);
+                alert('Encrypted Backup सुरक्षितपणे Restore झाला. अॅप पुन्हा उघडत आहे.');
                 window.location.reload();
               } catch (error) {
                 alert(error instanceof Error ? error.message : 'Could not restore this backup file.');
