@@ -4,7 +4,6 @@ import {
   Building2, 
   Mail, 
   Globe, 
-  DollarSign, 
   Sun, 
   Moon, 
   Check, 
@@ -15,7 +14,6 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { translations, Language } from '../i18n/translations';
-import { Currency } from '../types';
 import { exportEncryptedBackup, restoreEncryptedBackup } from '../lib/secureStorage';
 
 export const SettingsView: React.FC = () => {
@@ -25,7 +23,6 @@ export const SettingsView: React.FC = () => {
 
   const [displayName, setDisplayName] = useState(user?.displayName || '');
   const [companyName, setCompanyName] = useState(user?.companyName || '');
-  const [defaultCurrency, setDefaultCurrency] = useState<Currency>(user?.defaultCurrency || 'INR');
   const [selectedLang, setSelectedLang] = useState<Language>(user?.language || 'en');
   const [theme, setTheme] = useState<'light' | 'dark'>(user?.theme || 'light');
   const [savedMessage, setSavedMessage] = useState(false);
@@ -42,7 +39,6 @@ export const SettingsView: React.FC = () => {
     await updateProfile({
       displayName: displayName.trim(),
       companyName: companyName.trim(),
-      defaultCurrency,
       language: selectedLang,
       theme,
     });
@@ -59,7 +55,7 @@ export const SettingsView: React.FC = () => {
           {t.nav.settings}
         </h1>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-          Configure organisation profile, default currency, multi-language localization, and database settings.
+          Configure your profile, language, and appearance.
         </p>
       </div>
 
@@ -197,25 +193,8 @@ export const SettingsView: React.FC = () => {
           </span>
         </div>
 
-        {/* Currency & Language Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-          
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
-              <DollarSign className="w-3.5 h-3.5 text-slate-400" />
-              Default Currency
-            </label>
-            <select
-              value={defaultCurrency}
-              onChange={(e) => setDefaultCurrency(e.target.value as Currency)}
-              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            >
-              <option value="INR">INR (₹ Indian Rupee)</option>
-              <option value="USD">USD ($ US Dollar)</option>
-              <option value="EUR">EUR (€ Euro)</option>
-              <option value="GBP">GBP (£ British Pound)</option>
-            </select>
-          </div>
+        {/* Language & Appearance Row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
