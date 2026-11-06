@@ -6,6 +6,7 @@ import {
 import { useAuth } from './AuthContext';
 import { calculateNextRenewal, getDaysUntil } from '../utils/dateUtils';
 import { getMonthlyEquivalent, getYearlyEquivalent } from '../utils/currencyUtils';
+import { migrateLegacyData, writeSecureData } from '../lib/secureStorage';
 import { appwriteConfigured, APPWRITE_DATABASE_ID, APPWRITE_TABLES, tablesDB, Query, ownerPermissions } from '../lib/appwrite';
 
 interface SubscriptionContextType {
@@ -91,24 +92,20 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
           if (!cancelled) { setSubscriptions([]); setPayments([]); setActivities([]); }
         }
       } else {
-        const saved = localStorage.getItem(`moti_renew_data_${currentUserId}`);
-        if (saved) {
-          try {
-            const parsed = JSON.parse(saved);
-            if (!cancelled) {
-              setSubscriptions(parsed.subscriptions || []);
-              setPayments(parsed.payments || []);
-              setActivities(parsed.activities || []);
-            }
-          } catch {
-            if (!cancelled) { setSubscriptions([]); setPayments([]); setActivities([]); }
+        try {
+          const parsed = await migrateLegacyData(currentUserId) as { subscriptions?: Subscription[]; payments?: PaymentRecord[]; activities?: ActivityLog[] } | null;
+          if (!cancelled && parsed) {
+            setSubscriptions(parsed.subscriptions || []);
+            setPayments(parsed.payments || []);
+            setActivities(parsed.activities || []);
+          } else if (!cancelled) {
+            setSubscriptions(demoSubscriptions.map(s => ({ ...s, userId: currentUserId })));
+            setPayments(demoPayments.map(p => ({ ...p, userId: currentUserId })));
+            setActivities(demoActivities.map(a => ({ ...a, userId: currentUserId })));
           }
-        } else if (!cancelled) {
-          setSubscriptions(demoSubscriptions.map(s => ({ ...s, userId: currentUserId })));
-          setPayments(demoPayments.map(p => ({ ...p, userId: currentUserId })));
-          setActivities(demoActivities.map(a => ({ ...a, userId: currentUserId })));
-        } else if (!cancelled) {
-          setSubscriptions([]); setPayments([]); setActivities([]);
+        } catch (error) {
+          console.error('Encrypted local data could not be loaded:', error);
+          if (!cancelled) { setSubscriptions([]); setPayments([]); setActivities([]); }
         }
       }
       if (!cancelled) setLoading(false);
@@ -119,7 +116,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   useEffect(() => {
     if (!loading && !isRealUser && currentUserId) {
-      localStorage.setItem(`moti_renew_data_${currentUserId}`, JSON.stringify({ subscriptions, payments, activities }));
+      void writeSecureData(currentUserId, { subscriptions, payments, activities }).catch(error => console.error('Encrypted local save failed:', error));
     }
   }, [subscriptions, payments, activities, currentUserId, loading, isRealUser]);
 
