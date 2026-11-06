@@ -13,11 +13,10 @@ import { SettingsView } from './views/SettingsView';
 import { SubscriptionModal } from './components/SubscriptionModal';
 import { PaymentModal } from './components/PaymentModal';
 import { DeleteConfirmModal } from './components/DeleteConfirmModal';
-import { AuthModal } from './components/AuthModal';
 import { Subscription, PaymentRecord } from './types';
 
 function MainApp() {
-  const { user, loading: authLoading } = useAuth();
+  const { loading: authLoading } = useAuth();
   const { 
     subscriptions, 
     addSubscription, 
@@ -42,13 +41,9 @@ function MainApp() {
   const [deletingPayment, setDeletingPayment] = useState<PaymentRecord | null>(null);
 
   const [preselectedSubIdForWhatsApp, setPreselectedSubIdForWhatsApp] = useState<string | undefined>(undefined);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   if (authLoading) {
     return <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-600">Loading...</div>;
-  }
-  if (!user) {
-    return <AuthModal isOpen={true} onClose={() => {}} />;
   }
 
   // Open Payment Modal
@@ -83,7 +78,6 @@ function MainApp() {
         onOpenAddModal={() => { setEditingSubscription(null); setIsAddModalOpen(true); }}
         onOpenRecordPayment={handleOpenRecordPayment}
         onOpenWhatsApp={handleOpenWhatsApp}
-        onOpenAuthModal={() => setIsAuthModalOpen(true)}
         onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         isMobileMenuOpen={isMobileMenuOpen}
       />
@@ -197,12 +191,6 @@ function MainApp() {
         title="Delete Payment Record"
         message="Are you sure you want to remove this verified payment from the ledger?"
         itemName={deletingPayment ? `${deletingPayment.serviceName} (${deletingPayment.currency} ${deletingPayment.amount})` : ''}
-      />
-
-      {/* Authentication Modal */}
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
       />
 
     </div>
