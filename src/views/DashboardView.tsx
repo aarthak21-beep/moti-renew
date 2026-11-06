@@ -11,7 +11,6 @@ import {
   ArrowUpRight,
   Sparkles,
   ChevronRight,
-  ShieldCheck,
   Send,
   Download
 } from 'lucide-react';
@@ -91,7 +90,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               Welcome back, {user?.displayName || 'Subscriber'}
             </h1>
             <p className="text-xs sm:text-sm text-blue-100/90 mt-1 max-w-xl">
-              {t.tagline} Tracking {metrics.totalSubscriptions} subscriptions across your organisation.
+              {t.tagline} Tracking {metrics.totalSubscriptions} subscriptions.
             </p>
           </div>
 
@@ -436,7 +435,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 {t.metrics.recentActivities}
               </h2>
               <span className="text-[11px] text-slate-400">
-                Audited Log
+                Recent
               </span>
             </div>
 
@@ -469,27 +468,21 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div className="p-5 rounded-2xl bg-emerald-500/10 border border-emerald-200 dark:border-emerald-800/60 dark:bg-emerald-950/20 text-slate-900 dark:text-slate-100 space-y-3">
             <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold text-xs">
               <Send className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-              <span>WhatsApp Reminder Center</span>
+              <span>WhatsApp Reminder</span>
             </div>
             <p className="text-xs text-emerald-900/80 dark:text-emerald-200/80 leading-relaxed">
-              Dispatch courteous, multi-lingual payment and renewal notices to management or vendors directly via WhatsApp.
+              तयार केलेला रिन्यूअल किंवा पेमेंट मेसेज WhatsApp मध्ये उघडा आणि स्वतः तपासून पाठवा.
             </p>
             <button
               onClick={() => onNavigateTab('reminders')}
               className="w-full py-2 px-3 text-xs font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
             >
-              <span>Open WhatsApp Hub</span>
+              <span>Create WhatsApp Reminder</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          {/* Security & Isolation notice */}
-          <div className="p-4 rounded-xl bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 text-[11px] flex items-center gap-2.5">
-            <ShieldCheck className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0" />
-            <span>
-              Tenant data strictly isolated. All operations validated against ABAC security policies.
-            </span>
-          </div>
+
 
         </div>
 
