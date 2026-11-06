@@ -74,7 +74,7 @@ export interface UserProfile {
   displayName: string;
   companyName?: string;
   defaultCurrency: Currency;
-  language: 'en' | 'hi' | 'mr';
+  language: 'en' | 'hi';
   theme: 'light' | 'dark';
   createdAt: string;
 }
