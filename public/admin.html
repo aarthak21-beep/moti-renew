@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MOTI Renew · License Admin</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#f4f7fb;color:#172033;font:15px system-ui,-apple-system,Segoe UI,sans-serif}
+    main{max-width:1050px;margin:40px auto;padding:0 18px}.card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:22px;margin:16px 0;box-shadow:0 8px 30px #0f172a0a}
+    h1{margin:0 0 6px;font-size:27px}p{color:#64748b}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+    label{display:block;font-size:13px;font-weight:650;margin:0 0 6px}input,button{font:inherit;border-radius:9px;padding:11px 12px;border:1px solid #cbd5e1;width:100%}
+    button{background:#1d4ed8;color:#fff;border:0;font-weight:700;cursor:pointer}button.secondary{background:#e2e8f0;color:#172033}button.danger{background:#b91c1c}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}.actions button{width:auto;padding:8px 11px;font-size:13px}
+    .muted{font-size:12px;color:#64748b}.status{margin:12px 0;padding:10px;border-radius:8px;background:#eff6ff;color:#1e40af}
+    .tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:700px}th,td{text-align:left;padding:11px;border-bottom:1px solid #e2e8f0;font-size:13px}th{color:#64748b}
+    code{font-size:12px;word-break:break-all}.hidden{display:none}
+  </style>
+</head>
+<body>
+<main>
+  <h1>MOTI Renew · License Admin</h1>
+  <p>Manage customer licenses. Keep the admin token private.</p>
+  <section class="card" id="settings">
+    <div class="grid">
+      <div><label for="api">Worker API URL</label><input id="api" placeholder="https://moti-renew-license.<account>.workers.dev"></div>
+      <div><label for="token">Admin token</label><input id="token" type="password" autocomplete="off" placeholder="Paste admin token"></div>
+    </div>
+    <div class="actions" style="margin-top:12px"><button id="connect">Connect</button><button class="secondary" id="forget">Forget token</button></div>
+    <div id="status" class="status" role="status">Enter your Worker URL and admin token.</div>
+  </section>
+  <section class="card hidden" id="create">
+    <h2>Create customer license</h2>
+    <div class="grid">
+      <div><label for="customer">Customer / business name</label><input id="customer" placeholder="Customer name"></div>
+      <div><label for="expiry">License expiry (local time)</label><input id="expiry" type="datetime-local"></div>
+    </div>
+    <div class="actions" style="margin-top:12px"><button id="make">Generate & save license</button></div>
+    <p class="muted">A license is bound to the first device that activates it. You can reset the device binding below.</p>
+  </section>
+  <section class="card hidden" id="list">
+    <div class="actions" style="justify-content:space-between;align-items:center"><h2>Customer licenses</h2><button class="secondary" id="refresh">Refresh</button></div>
+    <div class="tablewrap"><table><thead><tr><th>Customer / Key</th><th>Status</th><th>Expires</th><th>Device</th><th>Actions</th></tr></thead><tbody id="rows"></tbody></table></div>
+  </section>
+</main>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  let api = "";
+  let token = "";
+  const say = (message, bad = false) => { $("status").textContent = message; $("status").style.background = bad ? "#fef2f2" : "#eff6ff"; $("status").style.color = bad ? "#991b1b" : "#1e40af"; };
+  const request = async (path, options = {}) => {
+    const response = await fetch(api.replace(/\/$/, "") + path, { ...options, headers: { "content-type":"application/json", "authorization":"Bearer " + token, ...(options.headers || {}) } });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || data.reason || ("Request failed: " + response.status));
+    return data;
+  };
+  const load = async () => {
+    const data = await request("/api/admin/licenses");
+    $("rows").replaceChildren();
+    for (const item of data.licenses || []) {
+      const tr = document.createElement("tr");
+      const first = document.createElement("td");
+      const name = document.createElement("strong"); name.textContent = item.customer_name;
+      const key = document.createElement("div"); const code = document.createElement("code"); code.textContent = item.license_key; key.append(code);
+      first.append(name,key);
+      const status = document.createElement("td"); status.textContent = item.status;
+      const expiry = document.createElement("td"); expiry.textContent = new Date(item.expires_at).toLocaleString();
+      const device = document.createElement("td"); device.textContent = item.device_id ? item.device_id.slice(0,14) + "…" : "Not activated";
+      const actions = document.createElement("td"); const wrap = document.createElement("div"); wrap.className = "actions";
+      const toggle = document.createElement("button"); toggle.className = item.status === "active" ? "danger" : "secondary"; toggle.textContent = item.status === "active" ? "Suspend" : "Activate";
+      toggle.onclick = async () => { await request("/api/admin/licenses/" + item.id,{method:"PATCH",body:JSON.stringify({status:item.status === "active" ? "suspended" : "active"})}); await load(); };
+      const reset = document.createElement("button"); reset.className = "secondary"; reset.textContent = "Reset device";
+      reset.onclick = async () => { if(confirm("Allow this license to activate on a new device?")) { await request("/api/admin/licenses/" + item.id,{method:"PATCH",body:JSON.stringify({resetDevice:true})}); await load(); } };
+      wrap.append(toggle,reset); actions.append(wrap); tr.append(first,status,expiry,device,actions); $("rows").append(tr);
+    }
+  };
+  $("connect").onclick = async () => {
+    api = $("api").value.trim(); token = $("token").value.trim();
+    if (!api || !token) return say("Worker URL and admin token are required.",true);
+    try { await load(); $("create").classList.remove("hidden"); $("list").classList.remove("hidden"); say("Connected. License list loaded."); }
+    catch (error) { say(error.message,true); }
+  };
+  $("forget").onclick = () => { $("token").value = ""; token = ""; $("create").classList.add("hidden"); $("list").classList.add("hidden"); say("Admin token cleared from this page."); };
+  $("refresh").onclick = async () => { try { await load(); say("License list refreshed."); } catch (error) { say(error.message,true); } };
+  $("make").onclick = async () => {
+    const customerName = $("customer").value.trim();
+    const expiryValue = $("expiry").value;
+    if (!customerName || !expiryValue) return say("Enter customer name and expiry.",true);
+    const licenseKey = "MOTI-" + crypto.randomUUID().replace(/-/g,"").toUpperCase();
+    try {
+      await request("/api/admin/licenses",{method:"POST",body:JSON.stringify({customerName,licenseKey,expiresAt:new Date(expiryValue).toISOString()})});
+      await navigator.clipboard?.writeText(licenseKey).catch(() => {});
+      say("License created. Key copied if clipboard permission was available: " + licenseKey);
+      $("customer").value = ""; await load();
+    } catch (error) { say(error.message,true); }
+  };
+})();
+</script>
+</body>
+</html>
