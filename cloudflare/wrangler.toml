@@ -8,4 +8,4 @@ ALLOWED_ORIGIN = "https://moti-renew.onrender.com"
 [[d1_databases]]
 binding = "DB"
 database_name = "moti-renew-licenses"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id = "25a2b1c8-4cf4-44e7-b132-64932dbcacd4"
