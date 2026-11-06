@@ -10,7 +10,6 @@ interface AuthContextType {
   loginWithGoogle: () => Promise<boolean>;
   logout: () => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
-  isAppwriteConnected: boolean;
 }
 
 const LOCAL_PROFILE_KEY = 'moti_renew_user';
@@ -66,7 +65,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <AuthContext.Provider value={{
       user, loading: false, loginDemo, loginWithEmail, signupWithEmail,
-      loginWithGoogle, logout, updateProfile, isAppwriteConnected: false,
+      loginWithGoogle, logout, updateProfile,
     }}>
       {children}
     </AuthContext.Provider>
