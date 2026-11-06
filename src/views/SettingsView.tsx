@@ -73,7 +73,7 @@ export const SettingsView: React.FC = () => {
           <h2 className="text-sm font-bold text-slate-900 dark:text-white">Backup & Restore</h2>
         </div>
         <p className="text-xs text-slate-500 dark:text-slate-400">
-          Backup PIN/Recovery Key ने encrypted असतो. Restore करताना त्याच Backup चा PIN किंवा Recovery Key आवश्यक आहे.
+          Backups are encrypted with a PIN or Recovery Key. You will need the same backup's PIN or Recovery Key to restore it.
         </p>
         <div className="flex flex-wrap gap-3">
           <button
@@ -118,14 +118,14 @@ export const SettingsView: React.FC = () => {
               try {
                 const parsed = JSON.parse(await file.text());
                 if (parsed?.app !== 'MOTI Renew' || parsed?.formatVersion !== 2) {
-                  throw new Error('हा जुना किंवा असुरक्षित Backup आहे. नवीन encrypted Backup वापरा.');
+                  throw new Error('This backup is old or unsupported. Please use a newer encrypted backup.');
                 }
-                if (!window.confirm('हा Backup Restore केल्यास सध्याचा डेटा बदलला जाईल. पुढे जायचे?')) return;
-                const secret = window.prompt('या Backup चा PIN किंवा Recovery Key टाका:');
+                if (!window.confirm('Restoring this backup will replace the current data. Do you want to continue?')) return;
+                const secret = window.prompt('Enter this backup's PIN or Recovery Key:');
                 if (!secret) return;
                 const userId = user?.uid || 'usr_moti_demo_01';
                 await restoreEncryptedBackup(userId, parsed, secret);
-                alert('Encrypted Backup सुरक्षितपणे Restore झाला. अॅप पुन्हा उघडत आहे.');
+                alert('Encrypted backup restored successfully. The app will now reload.');
                 window.location.reload();
               } catch (error) {
                 alert(error instanceof Error ? error.message : 'Could not restore this backup file.');
