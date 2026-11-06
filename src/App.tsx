@@ -15,6 +15,7 @@ import { PaymentModal } from './components/PaymentModal';
 import { DeleteConfirmModal } from './components/DeleteConfirmModal';
 import { Subscription, PaymentRecord } from './types';
 import { LicenseGate } from './components/LicenseGate';
+import { LocalSecurityGate } from './components/LocalSecurityGate';
 
 function MainApp() {
   const { loading: authLoading } = useAuth();
@@ -201,9 +202,11 @@ function MainApp() {
 export default function App() {
   return (
     <AuthProvider>
-      <SubscriptionProvider>
-        <LicenseGate><MainApp /></LicenseGate>
-      </SubscriptionProvider>
+      <LocalSecurityGate>
+        <SubscriptionProvider>
+          <LicenseGate><MainApp /></LicenseGate>
+        </SubscriptionProvider>
+      </LocalSecurityGate>
     </AuthProvider>
   );
 }
