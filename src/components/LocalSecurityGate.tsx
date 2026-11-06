@@ -8,7 +8,6 @@ export const LocalSecurityGate: React.FC<{ children: React.ReactNode }> = ({ chi
   const { user, loading: authLoading } = useAuth();
   const userId = user?.uid || 'usr_moti_demo_01';
   const [stage, setStage] = useState<Stage>(() => hasLocalSecurity(userId) ? 'unlock' : 'setup');
-  useEffect(() => { setStage(hasLocalSecurity(userId) ? 'unlock' : 'setup'); resetFields(); }, [userId]);
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
   const [recoveryInput, setRecoveryInput] = useState('');
@@ -17,6 +16,7 @@ export const LocalSecurityGate: React.FC<{ children: React.ReactNode }> = ({ chi
   const [busy, setBusy] = useState(false);
 
   const resetFields = () => { setPin(''); setConfirmPin(''); setRecoveryInput(''); setError(''); };
+  useEffect(() => { setStage(hasLocalSecurity(userId) ? 'unlock' : 'setup'); resetFields(); }, [userId]);
 
   const handleSetup = async () => {
     setError('');
