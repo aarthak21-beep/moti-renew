@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { OAuthProvider } from 'appwrite';
 import { UserProfile } from '../types';
-import { supabase } from '../lib/supabase';
+import { account, appwriteConfigured, APPWRITE_DATABASE_ID, APPWRITE_TABLES, tablesDB, ownerPermissions } from '../lib/appwrite';
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -11,51 +12,52 @@ interface AuthContextType {
   loginWithGoogle: () => Promise<boolean>;
   logout: () => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
-  isSupabaseConnected: boolean;
+  isAppwriteConnected: boolean;
 }
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
 const authEmailForId = (userId: string) => `${userId.trim().toLowerCase()}@motirenew.invalid`;
 
 async function profileForUser(authUser: any): Promise<UserProfile> {
   const fallback: UserProfile = {
-    uid: authUser.id,
-    email: authUser.user_metadata?.username || authUser.email || '',
-    displayName: authUser.user_metadata?.display_name || authUser.user_metadata?.username || 'Subscriber',
-    companyName: authUser.user_metadata?.company_name || 'My Business',
+    uid: authUser.$id,
+    email: authUser.email || authUser.name || '',
+    displayName: authUser.name || 'Subscriber',
+    companyName: 'My Business',
     defaultCurrency: 'INR',
     language: 'en',
     theme: 'light',
-    createdAt: authUser.created_at || new Date().toISOString(),
+    createdAt: authUser.registration || new Date().toISOString(),
   };
-  if (!supabase) return fallback;
-  const { data, error } = await supabase.from('profiles').select('*').eq('id', authUser.id).maybeSingle();
-  if (error) throw error;
-  if (data) {
+  try {
+    const row: any = await tablesDB.getRow(APPWRITE_DATABASE_ID, APPWRITE_TABLES.profiles, authUser.$id);
     return {
-      uid: data.id,
-      email: data.email || fallback.email,
-      displayName: data.display_name || fallback.displayName,
-      companyName: data.company_name || fallback.companyName,
-      defaultCurrency: data.default_currency || 'INR',
-      language: data.language || 'en',
-      theme: data.theme || 'light',
-      createdAt: data.created_at || fallback.createdAt,
+      uid: authUser.$id,
+      email: row.email || fallback.email,
+      displayName: row.displayName || fallback.displayName,
+      companyName: row.companyName || fallback.companyName,
+      defaultCurrency: row.defaultCurrency || 'INR',
+      language: row.language || 'en',
+      theme: row.theme || 'light',
+      createdAt: authUser.registration || fallback.createdAt,
     };
+  } catch (error: any) {
+    if (error?.code !== 404) throw error;
+    await tablesDB.createRow(APPWRITE_DATABASE_ID, APPWRITE_TABLES.profiles, authUser.$id, {
+      userId: authUser.$id,
+      email: fallback.email,
+      displayName: fallback.displayName,
+      companyName: fallback.companyName,
+      defaultCurrency: fallback.defaultCurrency,
+      language: fallback.language,
+      theme: fallback.theme,
+    }, ownerPermissions(authUser.$id));
+    return fallback;
   }
-  const { error: saveError } = await supabase.from('profiles').upsert({
-    id: authUser.id, email: fallback.email, display_name: fallback.displayName,
-    company_name: fallback.companyName, default_currency: fallback.defaultCurrency,
-    language: fallback.language, theme: fallback.theme,
-  });
-  if (saveError) throw saveError;
-  return fallback;
 }
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(Boolean(supabase));
+  const [loading, setLoading] = useState(appwriteConfigured);
 
   useEffect(() => {
     if (user) {
@@ -67,93 +69,70 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [user]);
 
   useEffect(() => {
-    if (!supabase) { setLoading(false); return; }
+    if (!appwriteConfigured) { setLoading(false); return; }
     let active = true;
-    supabase.auth.getSession().then(async ({ data, error }) => {
-      if (error) console.error('Supabase session error:', error.message);
-      if (data.session?.user) {
-        try {
-          const profile = await profileForUser(data.session.user);
-          if (active) setUser(profile);
-        } catch (profileError) {
-          console.error('Could not load profile:', profileError);
-        }
-      } else if (active) {
-        setUser(null);
+    account.get().then(async authUser => {
+      try {
+        const profile = await profileForUser(authUser);
+        if (active) setUser(profile);
+      } catch (error) {
+        console.error('Could not load Appwrite profile:', error);
+      } finally {
+        if (active) setLoading(false);
       }
-      if (active) setLoading(false);
+    }).catch((error: any) => {
+      if (error?.code !== 401) console.error('Appwrite session error:', error);
+      if (active) { setUser(null); setLoading(false); }
     });
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!active) return;
-      if (!session?.user) {
-        setUser(null);
-        setLoading(false);
-        return;
-      }
-      // Defer profile queries until after the auth callback returns.
-      window.setTimeout(async () => {
-        try {
-          const profile = await profileForUser(session.user);
-          if (active) setUser(profile);
-        } catch (profileError) {
-          console.error('Could not load profile:', profileError);
-        } finally {
-          if (active) setLoading(false);
-        }
-      }, 0);
-    });
-    return () => { active = false; listener.subscription.unsubscribe(); };
+    return () => { active = false; };
   }, []);
 
   const loginDemo = (_name?: string, _email?: string) => {
-    // Demo sign-in is disabled; users must authenticate with Supabase.
+    // Demo sign-in is disabled; authenticate with Appwrite.
   };
 
   const loginWithEmail = async (userId: string, password = ''): Promise<boolean> => {
-    if (!supabase) throw new Error('Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY.');
+    if (!appwriteConfigured) throw new Error('Appwrite is not configured. Add VITE_APPWRITE_ENDPOINT, VITE_APPWRITE_PROJECT_ID and VITE_APPWRITE_DATABASE_ID.');
     if (!password) throw new Error('Please enter your password.');
+    const normalizedId = userId.trim().toLowerCase();
+    if (!/^[a-z0-9._-]{3,30}$/.test(normalizedId)) throw new Error('User ID must be 3–30 characters (letters, numbers, dot, underscore or hyphen).');
     setLoading(true);
     try {
-      const normalizedId = userId.trim().toLowerCase();
-      if (!/^[a-z0-9._-]{3,30}$/.test(normalizedId)) throw new Error('User ID must be 3–30 characters (letters, numbers, dot, underscore or hyphen).');
-      const { data, error } = await supabase.auth.signInWithPassword({ email: authEmailForId(normalizedId), password });
-      if (error) throw error;
-      if (data.user) setUser(await profileForUser(data.user));
-      return Boolean(data.user);
+      await account.createEmailPasswordSession(authEmailForId(normalizedId), password);
+      setUser(await profileForUser(await account.get()));
+      return true;
     } finally { setLoading(false); }
   };
 
   const signupWithEmail = async (name: string, userId: string, company = '', password = ''): Promise<boolean> => {
-    if (!supabase) throw new Error('Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY.');
+    if (!appwriteConfigured) throw new Error('Appwrite is not configured. Add the VITE_APPWRITE environment variables.');
     if (!password) throw new Error('Please enter a password.');
+    const normalizedId = userId.trim().toLowerCase();
+    if (!/^[a-z0-9._-]{3,30}$/.test(normalizedId)) throw new Error('User ID must be 3–30 characters (letters, numbers, dot, underscore or hyphen).');
     setLoading(true);
     try {
-      const normalizedId = userId.trim().toLowerCase();
-      if (!/^[a-z0-9._-]{3,30}$/.test(normalizedId)) throw new Error('User ID must be 3–30 characters (letters, numbers, dot, underscore or hyphen).');
-      const { data, error } = await supabase.auth.signUp({
-        email: authEmailForId(normalizedId), password,
-        options: { data: { username: normalizedId, display_name: name, company_name: company || 'My Company' } },
-      });
-      if (error) throw error;
-      if (data.user && !data.session) throw new Error('Email confirmation is still enabled in Supabase. Turn OFF Authentication → Providers → Email → Confirm email, then create the account again.');
-      if (data.user && data.session) setUser(await profileForUser(data.user));
-      return Boolean(data.user && data.session);
+      const email = authEmailForId(normalizedId);
+      await account.create('unique()', email, password, name);
+      await account.createEmailPasswordSession(email, password);
+      const authUser = await account.get();
+      const profile = await profileForUser(authUser);
+      await updateProfileForNewUser(profile, { displayName: name, companyName: company || 'My Company' });
+      setUser({ ...profile, displayName: name, companyName: company || 'My Company' });
+      return true;
     } finally { setLoading(false); }
   };
 
   const loginWithGoogle = async (): Promise<boolean> => {
-    if (!supabase) throw new Error('Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY.');
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google', options: { redirectTo: window.location.origin },
-    });
-    if (error) throw error;
+    if (!appwriteConfigured) throw new Error('Appwrite is not configured.');
+    account.createOAuth2Session(OAuthProvider.Google, window.location.origin, window.location.origin);
     return true;
   };
 
   const logout = async () => {
-    if (supabase) {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+    if (appwriteConfigured) {
+      try { await account.deleteSession('current'); } catch (error: any) {
+        if (error?.code !== 401) throw error;
+      }
     }
     setUser(null);
     localStorage.removeItem('moti_renew_user');
@@ -162,31 +141,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateProfile = async (updates: Partial<UserProfile>) => {
     if (!user) return;
     const updated = { ...user, ...updates };
-    if (supabase && !user.uid.startsWith('usr_')) {
-      const { error } = await supabase.from('profiles').upsert({
-        id: user.uid, email: updated.email, display_name: updated.displayName,
-        company_name: updated.companyName, default_currency: updated.defaultCurrency,
+    if (appwriteConfigured) {
+      await tablesDB.updateRow(APPWRITE_DATABASE_ID, APPWRITE_TABLES.profiles, user.uid, {
+        userId: user.uid, email: updated.email, displayName: updated.displayName,
+        companyName: updated.companyName, defaultCurrency: updated.defaultCurrency,
         language: updated.language, theme: updated.theme,
       });
-      if (error) throw error;
-      const { error: authError } = await supabase.auth.updateUser({
-        data: { display_name: updated.displayName, company_name: updated.companyName },
-      });
-      if (authError) throw authError;
+      await account.updateName(updated.displayName);
     }
     setUser(updated);
   };
 
-  return (
-    <AuthContext.Provider value={{
-      user, loading, loginDemo, loginWithEmail, signupWithEmail,
-      loginWithGoogle, logout, updateProfile,
-      isSupabaseConnected: Boolean(supabase),
-    }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{
+    user, loading, loginDemo, loginWithEmail, signupWithEmail,
+    loginWithGoogle, logout, updateProfile, isAppwriteConnected: appwriteConfigured,
+  }}>{children}</AuthContext.Provider>;
 };
+
+async function updateProfileForNewUser(profile: UserProfile, updates: Partial<UserProfile>) {
+  await tablesDB.updateRow(APPWRITE_DATABASE_ID, APPWRITE_TABLES.profiles, profile.uid, {
+    userId: profile.uid, email: profile.email,
+    displayName: updates.displayName || profile.displayName,
+    companyName: updates.companyName || profile.companyName,
+    defaultCurrency: profile.defaultCurrency, language: profile.language, theme: profile.theme,
+  });
+}
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
