@@ -14,6 +14,7 @@ import { SubscriptionModal } from './components/SubscriptionModal';
 import { PaymentModal } from './components/PaymentModal';
 import { DeleteConfirmModal } from './components/DeleteConfirmModal';
 import { Subscription, PaymentRecord } from './types';
+import { LicenseGate } from './components/LicenseGate';
 
 function MainApp() {
   const { loading: authLoading } = useAuth();
@@ -201,7 +202,7 @@ export default function App() {
   return (
     <AuthProvider>
       <SubscriptionProvider>
-        <MainApp />
+        <LicenseGate><MainApp /></LicenseGate>
       </SubscriptionProvider>
     </AuthProvider>
   );
