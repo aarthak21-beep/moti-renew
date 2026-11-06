@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { OAuthProvider } from 'appwrite';
+import { ID, OAuthProvider } from 'appwrite';
 import { UserProfile } from '../types';
 import { account, appwriteConfigured, APPWRITE_DATABASE_ID, APPWRITE_TABLES, tablesDB, ownerPermissions } from '../lib/appwrite';
 
@@ -112,7 +112,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     try {
       const email = authEmailForId(normalizedId);
-      await account.create('unique()', email, password, name);
+      await account.create(ID.unique(), email, password, name);
       await account.createEmailPasswordSession(email, password);
       const authUser = await account.get();
       const profile = await profileForUser(authUser);
