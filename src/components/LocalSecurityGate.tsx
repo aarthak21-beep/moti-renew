@@ -69,8 +69,8 @@ export const LocalSecurityGate: React.FC<{ children: React.ReactNode }> = ({ chi
           <div className="space-y-3">
             <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100">नवीन PIN तयार करा</h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">६ ते १२ अंकांचा PIN ठेवा. हा PIN प्रत्येक वेळी अॅप उघडताना लागेल.</p>
-            <input aria-label="नवीन PIN" className={inputClass} type="password" inputMode="numeric" autoComplete="new-password" maxLength={12} placeholder="नवीन PIN" value={pin} onChange={e => setPin(e.target.value.replace(/\\D/g, '').slice(0, 12))} />
-            <input aria-label="PIN पुन्हा टाका" className={inputClass} type="password" inputMode="numeric" autoComplete="new-password" maxLength={12} placeholder="PIN पुन्हा टाका" value={confirmPin} onChange={e => setConfirmPin(e.target.value.replace(/\\D/g, '').slice(0, 12))} />
+            <input aria-label="नवीन PIN" className={inputClass} type="password" inputMode="numeric" autoComplete="new-password" maxLength={12} placeholder="नवीन PIN" value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, '').slice(0, 12))} />
+            <input aria-label="PIN पुन्हा टाका" className={inputClass} type="password" inputMode="numeric" autoComplete="new-password" maxLength={12} placeholder="PIN पुन्हा टाका" value={confirmPin} onChange={e => setConfirmPin(e.target.value.replace(/\D/g, '').slice(0, 12))} />
             <button className={buttonClass} disabled={busy || pin.length < 6 || confirmPin.length < 6} onClick={handleSetup}>{busy ? 'सेटअप सुरू आहे…' : 'PIN सेट करा'}</button>
           </div>
         )}
@@ -78,7 +78,7 @@ export const LocalSecurityGate: React.FC<{ children: React.ReactNode }> = ({ chi
         {stage === 'unlock' && (
           <div className="space-y-3">
             <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100">PIN टाकून अॅप उघडा</h2>
-            <input aria-label="PIN" className={inputClass} type="password" inputMode="numeric" autoComplete="current-password" maxLength={12} placeholder="तुमचा PIN" value={pin} onChange={e => setPin(e.target.value.replace(/\\D/g, '').slice(0, 12))} onKeyDown={e => e.key === 'Enter' && void handleUnlock()} />
+            <input aria-label="PIN" className={inputClass} type="password" inputMode="numeric" autoComplete="current-password" maxLength={12} placeholder="तुमचा PIN" value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, '').slice(0, 12))} onKeyDown={e => e.key === 'Enter' && void handleUnlock()} />
             <button className={buttonClass} disabled={busy || pin.length < 6} onClick={handleUnlock}>{busy ? 'तपासत आहे…' : 'Unlock'}</button>
             <button className="w-full py-2 text-xs font-semibold text-blue-600 dark:text-blue-400" onClick={() => { resetFields(); setStage('recover'); }}>PIN विसरलात? Recovery Key वापरा</button>
           </div>
@@ -88,8 +88,8 @@ export const LocalSecurityGate: React.FC<{ children: React.ReactNode }> = ({ chi
           <div className="space-y-3">
             <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100">Recovery Key वापरा</h2>
             <input aria-label="Recovery Key" className={inputClass + ' text-sm tracking-normal'} autoComplete="off" placeholder="XXXXX-XXXXX-XXXXX-XXXXX" value={recoveryInput} onChange={e => setRecoveryInput(e.target.value.toUpperCase())} />
-            <input aria-label="नवीन PIN" className={inputClass} type="password" inputMode="numeric" maxLength={12} placeholder="नवीन PIN (६-१२ अंक)" value={pin} onChange={e => setPin(e.target.value.replace(/\\D/g, '').slice(0, 12))} />
-            <input aria-label="नवीन PIN पुन्हा टाका" className={inputClass} type="password" inputMode="numeric" maxLength={12} placeholder="नवीन PIN पुन्हा टाका" value={confirmPin} onChange={e => setConfirmPin(e.target.value.replace(/\\D/g, '').slice(0, 12))} />
+            <input aria-label="नवीन PIN" className={inputClass} type="password" inputMode="numeric" maxLength={12} placeholder="नवीन PIN (६-१२ अंक)" value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, '').slice(0, 12))} />
+            <input aria-label="नवीन PIN पुन्हा टाका" className={inputClass} type="password" inputMode="numeric" maxLength={12} placeholder="नवीन PIN पुन्हा टाका" value={confirmPin} onChange={e => setConfirmPin(e.target.value.replace(/\D/g, '').slice(0, 12))} />
             <button className={buttonClass} disabled={busy || !recoveryInput.trim() || pin.length < 6 || confirmPin.length < 6} onClick={handleRecover}>{busy ? 'Recovery सुरू आहे…' : 'PIN Reset करा'}</button>
             <button className="w-full py-2 text-xs text-slate-500" onClick={() => { resetFields(); setStage('unlock'); }}>मागे जा</button>
           </div>
