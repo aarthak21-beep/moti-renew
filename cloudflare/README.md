@@ -18,7 +18,8 @@ This folder contains the optional license-control service. Customer subscription
 5. From the `cloudflare` folder, deploy the Worker with Wrangler.
 6. Set a strong secret named `ADMIN_TOKEN` on the Worker (Worker Settings → Variables and Secrets). Do not put it in the website or GitHub.
 7. Set `ALLOWED_ORIGIN` to the exact deployed MOTI Renew origin.
-8. Open `https://moti-renew.onrender.com/admin.html`, enter the Worker URL and admin token, then create and manage licenses.
+8. In Render → moti-renew → Environment, add `VITE_LICENSE_API_URL` with the deployed Worker URL, then trigger a redeploy. Until this variable is set, the app remains in its current no-license-gate mode.
+9. Open `https://moti-renew.onrender.com/admin.html`, enter the Worker URL and admin token, then create and manage licenses.
 
 ## API
 
