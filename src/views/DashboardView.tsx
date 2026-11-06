@@ -68,12 +68,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const categoryEntries = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]);
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200">
+    <div className="space-y-6 sm:space-y-7 animate-in fade-in duration-300">
       
       {/* Top Banner & Quick Actions */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white shadow-xl relative overflow-hidden">
+      <div className="p-5 sm:p-7 rounded-[1.75rem] bg-gradient-to-br from-slate-950 via-blue-950 to-indigo-900 text-white shadow-xl shadow-blue-950/10 relative overflow-hidden ring-1 ring-white/10">
         {/* Subtle background glow */}
-        <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -right-10 -top-16 w-72 h-72 bg-cyan-400/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute right-1/4 -bottom-24 w-64 h-64 bg-indigo-400/20 rounded-full blur-3xl pointer-events-none" />
         
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
@@ -83,7 +84,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               </span>
               <span className="text-xs text-blue-200 flex items-center gap-1">
                 <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                Smart Renewal Radar
+                Renewal Overview
               </span>
             </div>
             <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">
@@ -168,12 +169,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       )}
 
       {/* 6 Metric Cards Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 gap-3 sm:gap-4">
         
         {/* Total Subscriptions */}
         <div 
           onClick={() => onNavigateTab('subscriptions')}
-          className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-blue-400 transition cursor-pointer shadow-xs group"
+          className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-700 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-950/5 transition-all duration-200 cursor-pointer shadow-sm group"
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate">
@@ -194,7 +195,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         {/* Active Subscriptions */}
         <div 
           onClick={() => onNavigateTab('subscriptions')}
-          className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-400 transition cursor-pointer shadow-xs group"
+          className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-700 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-950/5 transition-all duration-200 cursor-pointer shadow-sm group"
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate">
@@ -215,7 +216,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         {/* Upcoming Renewals */}
         <div 
           onClick={() => onNavigateTab('calendar')}
-          className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-blue-400 transition cursor-pointer shadow-xs group"
+          className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-700 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-950/5 transition-all duration-200 cursor-pointer shadow-sm group"
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate">
@@ -236,7 +237,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         {/* Expired Subscriptions */}
         <div 
           onClick={() => onNavigateTab('subscriptions')}
-          className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-red-400 transition cursor-pointer shadow-xs group"
+          className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-red-300 dark:hover:border-red-700 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-red-950/5 transition-all duration-200 cursor-pointer shadow-sm group"
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate">
@@ -257,7 +258,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         {/* Monthly Expense */}
         <div 
           onClick={() => onNavigateTab('analytics')}
-          className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-blue-400 transition cursor-pointer shadow-xs group"
+          className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-700 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-950/5 transition-all duration-200 cursor-pointer shadow-sm group"
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate">
@@ -278,7 +279,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         {/* Yearly Expense */}
         <div 
           onClick={() => onNavigateTab('analytics')}
-          className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-indigo-400 transition cursor-pointer shadow-xs group"
+          className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-700 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-950/5 transition-all duration-200 cursor-pointer shadow-sm group"
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate">
@@ -305,7 +306,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <div className="lg:col-span-2 space-y-6">
           
           {/* Renewals Due in next 7 days */}
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+          <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" />
@@ -465,7 +466,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
 
           {/* WhatsApp Direct Hub Card */}
-          <div className="p-5 rounded-2xl bg-emerald-500/10 border border-emerald-200 dark:border-emerald-800/60 dark:bg-emerald-950/20 text-slate-900 dark:text-slate-100 space-y-3">
+          <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 dark:border-emerald-800/60 dark:bg-emerald-950/20 text-slate-900 dark:text-slate-100 space-y-3">
             <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold text-xs">
               <Send className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
               <span>WhatsApp Reminder</span>
