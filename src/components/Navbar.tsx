@@ -147,13 +147,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <span>🇮🇳 हिन्दी</span>
                   {lang === 'hi' && <CheckCircle2 className="w-3.5 h-3.5" />}
                 </button>
-                <button
-                  onClick={() => handleLanguageSelect('mr')}
-                  className={`w-full text-left px-3 py-2 flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-700 ${lang === 'mr' ? 'font-bold text-blue-600 dark:text-blue-400' : 'text-slate-700 dark:text-slate-300'}`}
-                >
-                  <span>🇮🇳 मराठी</span>
-                  {lang === 'mr' && <CheckCircle2 className="w-3.5 h-3.5" />}
-                </button>
               </div>
             )}
           </div>
