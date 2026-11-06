@@ -155,15 +155,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateProfile = async (updates: Partial<UserProfile>) => {
     if (!user) return;
     const updated = { ...user, ...updates };
-    if (appwriteConfigured) {
-      await tablesDB.updateRow(APPWRITE_DATABASE_ID, APPWRITE_TABLES.profiles, user.uid, {
-        userId: user.uid, email: updated.email, displayName: updated.displayName,
-        companyName: updated.companyName, defaultCurrency: updated.defaultCurrency,
-        language: updated.language, theme: updated.theme,
-      });
-      await account.updateName(updated.displayName);
-    }
+
+    // Apply changes locally first so language and theme switch immediately.
+    // Cloud profile sync is best-effort and must not block local-first usage.
     setUser(updated);
+
+    if (appwriteConfigured) {
+      try {
+        await tablesDB.updateRow(APPWRITE_DATABASE_ID, APPWRITE_TABLES.profiles, user.uid, {
+          userId: user.uid, email: updated.email, displayName: updated.displayName,
+          companyName: updated.companyName, defaultCurrency: updated.defaultCurrency,
+          language: updated.language, theme: updated.theme,
+        });
+        if (updates.displayName !== undefined) {
+          await account.updateName(updated.displayName);
+        }
+      } catch (error) {
+        console.error('Could not sync profile changes. Local settings were saved:', error);
+      }
+    }
   };
 
   return <AuthContext.Provider value={{
