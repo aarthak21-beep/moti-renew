@@ -64,7 +64,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
       const target = subscriptions.find(s => s.id === initialId);
       if (target) {
-        setAmount(target.amount);
+        setAmount(target.currency === 'INR' ? target.amount : '');
         setPaymentMethod(target.paymentMethod);
       }
       setPaymentDate(today);
@@ -80,7 +80,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     setSelectedSubId(subId);
     const target = subscriptions.find(s => s.id === subId);
     if (target) {
-      setAmount(target.amount);
+      setAmount(target.currency === 'INR' ? target.amount : '');
       setPaymentMethod(target.paymentMethod);
     }
   };
@@ -191,7 +191,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
                 <DollarSign className="w-3.5 h-3.5 text-slate-400" />
-                Amount Paid *
+                Amount Paid (₹ INR) *
               </label>
               <input
                 type="number"
