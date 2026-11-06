@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Receipt, CheckCircle, CreditCard, DollarSign, Calendar, AlertCircle } from 'lucide-react';
-import { Currency, PaymentMethod, PaymentStatus, Subscription } from '../types';
+import { PaymentMethod, PaymentStatus, Subscription } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { translations, Language } from '../i18n/translations';
 
@@ -48,7 +48,6 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   const [selectedSubId, setSelectedSubId] = useState<string>('');
   const [paymentDate, setPaymentDate] = useState<string>(today);
   const [amount, setAmount] = useState<number | ''>('');
-  const [currency, setCurrency] = useState<Currency>('INR');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('UPI / GPay / PhonePe');
   const [transactionRef, setTransactionRef] = useState<string>('');
   const [status, setStatus] = useState<PaymentStatus>('Success');
@@ -66,7 +65,6 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
       const target = subscriptions.find(s => s.id === initialId);
       if (target) {
         setAmount(target.amount);
-        setCurrency(target.currency);
         setPaymentMethod(target.paymentMethod);
       }
       setPaymentDate(today);
@@ -83,7 +81,6 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     const target = subscriptions.find(s => s.id === subId);
     if (target) {
       setAmount(target.amount);
-      setCurrency(target.currency);
       setPaymentMethod(target.paymentMethod);
     }
   };
@@ -115,7 +112,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         subscriptionId: selectedSubId,
         paymentDate,
         amount: Number(amount),
-        currency,
+        currency: 'INR',
         paymentMethod,
         transactionRef: transactionRef.trim() || undefined,
         status,
@@ -190,7 +187,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
           </div>
 
           {/* Amount & Currency */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
                 <DollarSign className="w-3.5 h-3.5 text-slate-400" />
@@ -206,21 +203,6 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 placeholder="0.00"
                 className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
               />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                Currency
-              </label>
-              <select
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value as Currency)}
-                className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-              >
-                <option value="INR">INR (₹)</option>
-                <option value="USD">USD ($)</option>
-                <option value="EUR">EUR (€)</option>
-                <option value="GBP">GBP (£)</option>
-              </select>
             </div>
           </div>
 
