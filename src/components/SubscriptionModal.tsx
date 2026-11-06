@@ -4,7 +4,6 @@ import {
   Subscription, 
   SubscriptionCategory, 
   BillingCycle, 
-  Currency, 
   PaymentMethod, 
   SubscriptionStatus 
 } from '../types';
@@ -20,14 +19,14 @@ interface SubscriptionModalProps {
 }
 
 const PRESET_SERVICES = [
-  { name: 'AWS Cloud', provider: 'Amazon Web Services', category: 'Cloud Storage' as SubscriptionCategory, cycle: 'Monthly' as BillingCycle, amount: 8500, currency: 'INR' as Currency },
-  { name: 'Google Workspace', provider: 'Google LLC', category: 'Business Tools' as SubscriptionCategory, cycle: 'Monthly' as BillingCycle, amount: 4800, currency: 'INR' as Currency },
-  { name: 'Canva Pro', provider: 'Canva Pty Ltd', category: 'Software' as SubscriptionCategory, cycle: 'Yearly' as BillingCycle, amount: 3999, currency: 'INR' as Currency },
-  { name: 'ChatGPT Plus', provider: 'OpenAI', category: 'Software' as SubscriptionCategory, cycle: 'Monthly' as BillingCycle, amount: 20, currency: 'USD' as Currency },
-  { name: 'Netflix Premium', provider: 'Netflix', category: 'Entertainment' as SubscriptionCategory, cycle: 'Monthly' as BillingCycle, amount: 649, currency: 'INR' as Currency },
-  { name: 'Airtel Xstream Fiber', provider: 'Bharti Airtel', category: 'Internet' as SubscriptionCategory, cycle: 'Monthly' as BillingCycle, amount: 1179, currency: 'INR' as Currency },
-  { name: 'Spotify Premium', provider: 'Spotify AB', category: 'Entertainment' as SubscriptionCategory, cycle: 'Monthly' as BillingCycle, amount: 119, currency: 'INR' as Currency },
-  { name: 'GitHub Copilot', provider: 'GitHub Inc', category: 'Software' as SubscriptionCategory, cycle: 'Monthly' as BillingCycle, amount: 10, currency: 'USD' as Currency },
+  { name: 'AWS Cloud', provider: 'Amazon Web Services', category: 'Cloud Storage' as SubscriptionCategory, cycle: 'Monthly' as BillingCycle, amount: 8500 },
+  { name: 'Google Workspace', provider: 'Google LLC', category: 'Business Tools' as SubscriptionCategory, cycle: 'Monthly' as BillingCycle, amount: 4800 },
+  { name: 'Canva Pro', provider: 'Canva Pty Ltd', category: 'Software' as SubscriptionCategory, cycle: 'Yearly' as BillingCycle, amount: 3999 },
+  { name: 'ChatGPT Plus', provider: 'OpenAI', category: 'Software' as SubscriptionCategory, cycle: 'Monthly' as BillingCycle, amount: 20 },
+  { name: 'Netflix Premium', provider: 'Netflix', category: 'Entertainment' as SubscriptionCategory, cycle: 'Monthly' as BillingCycle, amount: 649 },
+  { name: 'Airtel Xstream Fiber', provider: 'Bharti Airtel', category: 'Internet' as SubscriptionCategory, cycle: 'Monthly' as BillingCycle, amount: 1179 },
+  { name: 'Spotify Premium', provider: 'Spotify AB', category: 'Entertainment' as SubscriptionCategory, cycle: 'Monthly' as BillingCycle, amount: 119 },
+  { name: 'GitHub Copilot', provider: 'GitHub Inc', category: 'Software' as SubscriptionCategory, cycle: 'Monthly' as BillingCycle, amount: 10 },
 ];
 
 const CATEGORIES: SubscriptionCategory[] = [
@@ -41,7 +40,6 @@ const CATEGORIES: SubscriptionCategory[] = [
 ];
 
 const BILLING_CYCLES: BillingCycle[] = ['Weekly', 'Monthly', 'Quarterly', 'Yearly'];
-const CURRENCIES: Currency[] = ['INR', 'USD', 'EUR', 'GBP'];
 const PAYMENT_METHODS: PaymentMethod[] = [
   'Credit Card',
   'Debit Card',
@@ -63,14 +61,12 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   const lang: Language = user?.language || 'en';
   const t = translations[lang] || translations.en;
 
-  const defaultCurrency: Currency = user?.defaultCurrency || 'INR';
   const today = new Date().toISOString().split('T')[0];
 
   const [serviceName, setServiceName] = useState('');
   const [providerName, setProviderName] = useState('');
   const [category, setCategory] = useState<SubscriptionCategory>('Software');
   const [amount, setAmount] = useState<number | ''>(999);
-  const [currency, setCurrency] = useState<Currency>(defaultCurrency);
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('Monthly');
   const [startDate, setStartDate] = useState(today);
   const [renewalDate, setRenewalDate] = useState(() => calculateNextRenewal(today, 'Monthly'));
@@ -88,7 +84,6 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
       setProviderName(initialData.providerName || '');
       setCategory(initialData.category);
       setAmount(initialData.amount);
-      setCurrency(initialData.currency);
       setBillingCycle(initialData.billingCycle);
       setStartDate(initialData.startDate);
       setRenewalDate(initialData.renewalDate);
@@ -102,7 +97,6 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
       setProviderName('');
       setCategory('Software');
       setAmount(999);
-      setCurrency(defaultCurrency);
       setBillingCycle('Monthly');
       setStartDate(today);
       setRenewalDate(calculateNextRenewal(today, 'Monthly'));
@@ -113,7 +107,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
       setCustomReminderDate('');
     }
     setError(null);
-  }, [initialData, isOpen, defaultCurrency, today]);
+  }, [initialData, isOpen, today]);
 
   if (!isOpen) return null;
 
@@ -123,7 +117,6 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
     setCategory(preset.category);
     setBillingCycle(preset.cycle);
     setAmount(preset.amount);
-    setCurrency(preset.currency);
     setRenewalDate(calculateNextRenewal(startDate, preset.cycle));
   };
 
@@ -171,7 +164,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         providerName: providerName.trim(),
         category,
         amount: Number(amount),
-        currency,
+        currency: 'INR',
         billingCycle,
         startDate,
         renewalDate,
@@ -310,7 +303,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           </div>
 
           {/* Row 3: Amount, Currency & Billing Cycle */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
                 <DollarSign className="w-3.5 h-3.5 text-slate-400" />
@@ -326,22 +319,6 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                 placeholder="0.00"
                 className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
               />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                {t.fields.currency} *
-              </label>
-              <select
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value as Currency)}
-                className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-              >
-                {CURRENCIES.map((cur) => (
-                  <option key={cur} value={cur}>
-                    {cur} ({cur === 'INR' ? '₹' : cur === 'USD' ? '$' : cur === 'EUR' ? '€' : '£'})
-                  </option>
-                ))}
-              </select>
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
