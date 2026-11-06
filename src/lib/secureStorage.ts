@@ -107,7 +107,7 @@ export async function recoverLocalSecurity(userId: string, recoveryKey: string, 
   const recoveryWrappingKey = await deriveWrappingKey(recoveryKey.replace(/\s/g, '').toUpperCase(), fromBase64(meta.recoverySalt));
   let rawDataKey: Uint8Array;
   try { rawDataKey = await unwrapRawKey(meta.recoveryWrappedKey, recoveryWrappingKey); }
-  catch { throw new Error('Recovery Key चुकीची आहे. पुन्हा तपासा.'); }
+  catch { throw new Error('Incorrect Recovery Key. Please try again.'); }
   const pinSalt = randomBytes(16);
   const recoverySalt = randomBytes(16);
   const nextRecoveryKey = generateRecoveryKey();
@@ -180,7 +180,7 @@ export async function restoreEncryptedBackup(userId: string, backup: any, secret
       rawDataKey = await unwrapRawKey(meta.recoveryWrappedKey, wrappingKey);
       method = 'recovery';
     } catch {
-      throw new Error('हा Backup उघडण्यासाठी दिलेला PIN किंवा Recovery Key चुकीचा आहे.');
+      throw new Error('The PIN or Recovery Key entered for this backup is incorrect.');
     }
   }
   const importedKey = await crypto.subtle.importKey('raw', rawDataKey, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
