@@ -33,6 +33,7 @@ export const SettingsView: React.FC = () => {
   const [selectedLang, setSelectedLang] = useState<Language>(user?.language || 'en');
   const [theme, setTheme] = useState<'light' | 'dark'>(user?.theme || 'light');
   const [savedMessage, setSavedMessage] = useState(false);
+  const backupInputRef = useRef<HTMLInputElement>(null);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
