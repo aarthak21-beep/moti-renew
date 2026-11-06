@@ -121,7 +121,16 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const persist = async (table: 'subscriptions' | 'payments' | 'activities', record: any) => {
     if (!isRealUser || !user) return;
     const tableId = APPWRITE_TABLES[table];
-    const rowData = { userId: user.uid, id: record.id, data: JSON.stringify(record) };
+    const rowData: Record<string, unknown> = { userId: user.uid, id: record.id, data: JSON.stringify(record) };
+    if (table === 'subscriptions') {
+      rowData.planName = record.serviceName;
+      rowData.planPrice = record.amount;
+      rowData.billingCycle = record.billingCycle;
+      rowData.startDate = record.startDate ? new Date(record.startDate + 'T00:00:00.000Z').toISOString() : new Date().toISOString();
+      rowData.endDate = record.renewalDate ? new Date(record.renewalDate + 'T00:00:00.000Z').toISOString() : new Date().toISOString();
+      rowData.status = record.status;
+      rowData.notes = record.notes || '';
+    }
     try {
       await tablesDB.updateRow(APPWRITE_DATABASE_ID, tableId, record.id, rowData);
     } catch (error: any) {
