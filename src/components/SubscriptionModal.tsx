@@ -22,11 +22,9 @@ const PRESET_SERVICES = [
   { name: 'AWS Cloud', provider: 'Amazon Web Services', category: 'Cloud Storage' as SubscriptionCategory, cycle: 'Monthly' as BillingCycle, amount: 8500 },
   { name: 'Google Workspace', provider: 'Google LLC', category: 'Business Tools' as SubscriptionCategory, cycle: 'Monthly' as BillingCycle, amount: 4800 },
   { name: 'Canva Pro', provider: 'Canva Pty Ltd', category: 'Software' as SubscriptionCategory, cycle: 'Yearly' as BillingCycle, amount: 3999 },
-  { name: 'ChatGPT Plus', provider: 'OpenAI', category: 'Software' as SubscriptionCategory, cycle: 'Monthly' as BillingCycle, amount: 20 },
   { name: 'Netflix Premium', provider: 'Netflix', category: 'Entertainment' as SubscriptionCategory, cycle: 'Monthly' as BillingCycle, amount: 649 },
   { name: 'Airtel Xstream Fiber', provider: 'Bharti Airtel', category: 'Internet' as SubscriptionCategory, cycle: 'Monthly' as BillingCycle, amount: 1179 },
   { name: 'Spotify Premium', provider: 'Spotify AB', category: 'Entertainment' as SubscriptionCategory, cycle: 'Monthly' as BillingCycle, amount: 119 },
-  { name: 'GitHub Copilot', provider: 'GitHub Inc', category: 'Software' as SubscriptionCategory, cycle: 'Monthly' as BillingCycle, amount: 10 },
 ];
 
 const CATEGORIES: SubscriptionCategory[] = [
@@ -83,7 +81,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
       setServiceName(initialData.serviceName);
       setProviderName(initialData.providerName || '');
       setCategory(initialData.category);
-      setAmount(initialData.amount);
+      setAmount(initialData.currency === 'INR' ? initialData.amount : '');
       setBillingCycle(initialData.billingCycle);
       setStartDate(initialData.startDate);
       setRenewalDate(initialData.renewalDate);
