@@ -70,7 +70,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     let cancelled = false;
     const load = async () => {
       setLoading(true);
-      if (isRealUser && supabase && user) {
+      if (isRealUser && user) {
         const [subs, pays, acts] = await Promise.all([
           tablesDB.listRows(APPWRITE_DATABASE_ID, APPWRITE_TABLES.subscriptions, [Query.equal('userId', user.uid), Query.limit(100)]),
           tablesDB.listRows(APPWRITE_DATABASE_ID, APPWRITE_TABLES.payments, [Query.equal('userId', user.uid), Query.limit(100)]),
