@@ -1,0 +1,19 @@
+{
+  "id": "/",
+  "name": "MOTi Renew",
+  "short_name": "MOTi Renew",
+  "description": "Subscription and renewal management by Moti Technologies",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0f766e",
+  "icons": [
+    {
+      "src": "/moti-renew-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
