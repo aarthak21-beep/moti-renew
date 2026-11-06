@@ -29,7 +29,6 @@ interface SubscriptionContextType {
   metrics: {
     totalSubscriptions: number; activeSubscriptions: number; upcomingRenewals: number;
     expiredSubscriptions: number; monthlyExpenseINR: number; yearlyExpenseINR: number;
-    monthlyExpenseUSD: number; yearlyExpenseUSD: number;
   };
 }
 
@@ -38,9 +37,9 @@ const demoSubscriptions: Subscription[] = [
   { id: 'sub_google_workspace_02', userId: 'usr_moti_demo_01', serviceName: 'Google Workspace Business', providerName: 'Google LLC', category: 'Business Tools', amount: 4800, currency: 'INR', billingCycle: 'Monthly', startDate: '2025-08-15', renewalDate: new Date(Date.now()+6*86400000).toISOString().slice(0,10), notes: '12 business email accounts + Google Meet standard', paymentMethod: 'Auto-Debit / NACH', status: 'Active', reminderDays: [1,3,7,15], createdAt: '2025-08-15T12:00:00Z', updatedAt: '2025-08-15T12:00:00Z' },
   { id: 'sub_canva_pro_03', userId: 'usr_moti_demo_01', serviceName: 'Canva Pro Enterprise', providerName: 'Canva Pty Ltd', category: 'Software', amount: 3999, currency: 'INR', billingCycle: 'Yearly', startDate: '2025-04-10', renewalDate: new Date(Date.now()+14*86400000).toISOString().slice(0,10), notes: 'Brand kit and social media graphics team account', paymentMethod: 'UPI / GPay / PhonePe', status: 'Active', reminderDays: [1,7,15], createdAt: '2025-04-10T09:00:00Z', updatedAt: '2025-04-10T09:00:00Z' },
   { id: 'sub_airtel_fiber_04', userId: 'usr_moti_demo_01', serviceName: 'Airtel Xstream Fiber 300Mbps', providerName: 'Bharti Airtel', category: 'Internet', amount: 1179, currency: 'INR', billingCycle: 'Monthly', startDate: '2025-01-01', renewalDate: new Date(Date.now()+86400000).toISOString().slice(0,10), notes: 'Office broadband connection with static IP', paymentMethod: 'UPI / GPay / PhonePe', status: 'Active', reminderDays: [1,3], createdAt: '2025-01-01T08:00:00Z', updatedAt: '2025-01-01T08:00:00Z' },
-  { id: 'sub_chatgpt_plus_05', userId: 'usr_moti_demo_01', serviceName: 'ChatGPT Plus & Team', providerName: 'OpenAI', category: 'Software', amount: 20, currency: 'USD', billingCycle: 'Monthly', startDate: '2025-06-20', renewalDate: new Date(Date.now()+21*86400000).toISOString().slice(0,10), notes: 'Engineering team research and prompt tests', paymentMethod: 'Credit Card', status: 'Active', reminderDays: [1,3,7], createdAt: '2025-06-20T14:30:00Z', updatedAt: '2025-06-20T14:30:00Z' },
+  { id: 'sub_chatgpt_plus_05', userId: 'usr_moti_demo_01', serviceName: 'ChatGPT Plus & Team', providerName: 'OpenAI', category: 'Software', amount: 1999, currency: 'INR', billingCycle: 'Monthly', startDate: '2025-06-20', renewalDate: new Date(Date.now()+21*86400000).toISOString().slice(0,10), notes: 'Engineering team research and prompt tests', paymentMethod: 'Credit Card', status: 'Active', reminderDays: [1,3,7], createdAt: '2025-06-20T14:30:00Z', updatedAt: '2025-06-20T14:30:00Z' },
   { id: 'sub_netflix_06', userId: 'usr_moti_demo_01', serviceName: 'Netflix Premium 4K', providerName: 'Netflix Inc', category: 'Entertainment', amount: 649, currency: 'INR', billingCycle: 'Monthly', startDate: '2025-03-05', renewalDate: new Date(Date.now()-3*86400000).toISOString().slice(0,10), notes: 'Executive lounge screen + mobile devices', paymentMethod: 'Debit Card', status: 'Expired', reminderDays: [1,3], createdAt: '2025-03-05T18:00:00Z', updatedAt: '2025-03-05T18:00:00Z' },
-  { id: 'sub_coursera_plus_07', userId: 'usr_moti_demo_01', serviceName: 'Coursera Plus Learning', providerName: 'Coursera Inc', category: 'Education', amount: 399, currency: 'USD', billingCycle: 'Yearly', startDate: '2025-05-12', renewalDate: new Date(Date.now()+45*86400000).toISOString().slice(0,10), notes: 'Upskilling program for junior engineers', paymentMethod: 'Credit Card', status: 'Active', reminderDays: [7,15], createdAt: '2025-05-12T11:00:00Z', updatedAt: '2025-05-12T11:00:00Z' },
+  { id: 'sub_coursera_plus_07', userId: 'usr_moti_demo_01', serviceName: 'Coursera Plus Learning', providerName: 'Coursera Inc', category: 'Education', amount: 399, currency: 'INR', billingCycle: 'Yearly', startDate: '2025-05-12', renewalDate: new Date(Date.now()+45*86400000).toISOString().slice(0,10), notes: 'Upskilling program for junior engineers', paymentMethod: 'Credit Card', status: 'Active', reminderDays: [7,15], createdAt: '2025-05-12T11:00:00Z', updatedAt: '2025-05-12T11:00:00Z' },
 ];
 
 const demoPayments: PaymentRecord[] = [
@@ -193,18 +192,17 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const markAllNotificationsAsRead = () => setReadNotificationIds(new Set(notifications.map(n => n.id)));
 
   const metrics = useMemo(() => {
-    let active = 0, expired = 0, upcoming = 0, monthlyINR = 0, yearlyINR = 0, monthlyUSD = 0, yearlyUSD = 0;
+    let active = 0, expired = 0, upcoming = 0, monthlyINR = 0, yearlyINR = 0;
     subscriptions.forEach(s => {
       const days = getDaysUntil(s.renewalDate);
       if (s.status === 'Active') {
         active++;
         if (days >= 0 && days <= 30) upcoming++;
         const m = getMonthlyEquivalent(s.amount, s.billingCycle), y = getYearlyEquivalent(s.amount, s.billingCycle);
-        if (s.currency === 'INR') { monthlyINR += m; yearlyINR += y; }
-        if (s.currency === 'USD') { monthlyUSD += m; yearlyUSD += y; }
+        monthlyINR += m; yearlyINR += y;
       } else if (s.status === 'Expired' || days < 0) expired++;
     });
-    return { totalSubscriptions: subscriptions.length, activeSubscriptions: active, upcomingRenewals: upcoming, expiredSubscriptions: expired, monthlyExpenseINR: Math.round(monthlyINR), yearlyExpenseINR: Math.round(yearlyINR), monthlyExpenseUSD: Math.round(monthlyUSD), yearlyExpenseUSD: Math.round(yearlyUSD) };
+    return { totalSubscriptions: subscriptions.length, activeSubscriptions: active, upcomingRenewals: upcoming, expiredSubscriptions: expired, monthlyExpenseINR: Math.round(monthlyINR), yearlyExpenseINR: Math.round(yearlyINR) };
   }, [subscriptions]);
 
   return <SubscriptionContext.Provider value={{ subscriptions, payments, activities, notifications, unreadNotificationCount, loading, addSubscription, updateSubscription, deleteSubscription, recordPayment, deletePayment, markNotificationAsRead, markAllNotificationsAsRead, metrics }}>{children}</SubscriptionContext.Provider>;
