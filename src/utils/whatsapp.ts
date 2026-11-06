@@ -4,7 +4,7 @@ import { formatDate, getDaysUntil } from './dateUtils';
 
 export function generateWhatsAppMessage(
   sub: Subscription,
-  lang: 'en' | 'hi' | 'mr' = 'en',
+  lang: 'en' | 'hi' = 'en',
   recipientName?: string
 ): string {
   const days = getDaysUntil(sub.renewalDate);
@@ -12,25 +12,6 @@ export function generateWhatsAppMessage(
   const formattedDate = formatDate(sub.renewalDate);
   const name = recipientName ? recipientName.trim() : 'Sir/Madam';
 
-  if (lang === 'mr') {
-    let urgency = `तुमच्या ${sub.serviceName} चे नूतनीकरण ${formattedDate} रोजी देय आहे (${days > 0 ? `${days} दिवस बाकी` : days === 0 ? 'आजच देय आहे' : 'मुदत उलटून गेली आहे'}).`;
-    if (days < 0) {
-      urgency = `⚠️ *तात्काळ सूचना:* तुमच्या ${sub.serviceName} चे नूतनीकरण थकीत आहे!`;
-    }
-
-    return `*मोती रिन्यू (Moti Technologies) - नूतनीकरण स्मरणपत्र* 🔔\n\n` +
-      `नमस्कार ${name},\n\n` +
-      `${urgency}\n\n` +
-      `📌 *तपशील:*\n` +
-      `• सेवा: *${sub.serviceName}* (${sub.providerName || sub.category})\n` +
-      `• रक्कम: *${formattedAmount}*\n` +
-      `• नूतनीकरण तारीख: *${formattedDate}*\n` +
-      `• बिलिंग सायकल: *${sub.billingCycle}*\n` +
-      `• पेमेंट पद्धत: *${sub.paymentMethod}*\n` +
-      (sub.notes ? `• टीप: ${sub.notes}\n` : '') +
-      `\nअखंड सेवेचा आनंद घेण्यासाठी वेळेवर नूतनीकरण करा.\n` +
-      `_मोती टेक्नॉलॉजिस द्वारे सुरक्षित व्यवस्थापन._`;
-  }
 
   if (lang === 'hi') {
     let urgency = `आपकी ${sub.serviceName} सदस्यता का नवीनीकरण ${formattedDate} को देय है (${days > 0 ? `${days} दिन शेष` : days === 0 ? 'आज ही देय है' : 'देय तिथि बीत चुकी है'}).`;
