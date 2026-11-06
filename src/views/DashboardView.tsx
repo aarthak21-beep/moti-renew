@@ -272,7 +272,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             {formatCurrency(metrics.monthlyExpenseINR, 'INR')}
           </div>
           <span className="text-[10px] text-slate-400 mt-1 block">
-            {metrics.monthlyExpenseUSD > 0 ? `+ $${metrics.monthlyExpenseUSD} USD/mo` : 'Active run-rate'}
+            Active run-rate
           </span>
         </div>
 
