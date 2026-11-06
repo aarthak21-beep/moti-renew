@@ -27,7 +27,7 @@ const readLocalProfile = (): UserProfile => {
     if (!saved) return createDefaultProfile();
     const profile = JSON.parse(saved) as UserProfile;
     if (!profile || typeof profile.uid !== 'string') return createDefaultProfile();
-    if (!['en', 'hi', 'mr'].includes(profile.language)) profile.language = 'en';
+    if (!['en', 'hi'].includes(profile.language)) profile.language = 'en';
     if (!['light', 'dark'].includes(profile.theme)) profile.theme = 'light';
     return profile;
   } catch {
