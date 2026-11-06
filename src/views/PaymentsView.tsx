@@ -60,12 +60,6 @@ export const PaymentsView: React.FC<PaymentsViewProps> = ({
       .reduce((acc, p) => acc + p.amount, 0);
   }, [payments]);
 
-  const totalPaidUSD = useMemo(() => {
-    return payments
-      .filter(p => p.status === 'Success' && p.currency === 'USD')
-      .reduce((acc, p) => acc + p.amount, 0);
-  }, [payments]);
-
   const getPaymentStatusBadge = (status: PaymentStatus) => {
     if (status === 'Success') {
       return (
@@ -125,7 +119,7 @@ export const PaymentsView: React.FC<PaymentsViewProps> = ({
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
           <span className="text-[11px] font-semibold text-slate-400">Total Payments Logged</span>
           <div className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">
@@ -142,13 +136,6 @@ export const PaymentsView: React.FC<PaymentsViewProps> = ({
           <span className="text-[10px] text-slate-400">Confirmed transactions</span>
         </div>
 
-        <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-          <span className="text-[11px] font-semibold text-slate-400">Total Cleared (USD)</span>
-          <div className="text-2xl font-extrabold text-blue-600 dark:text-blue-400 mt-1">
-            ${totalPaidUSD} USD
-          </div>
-          <span className="text-[10px] text-slate-400">International SaaS expenses</span>
-        </div>
       </div>
 
       {/* Toolbar */}
