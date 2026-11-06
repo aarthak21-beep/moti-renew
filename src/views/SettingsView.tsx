@@ -79,7 +79,7 @@ export const SettingsView: React.FC = () => {
             onClick={async () => {
               const userId = user?.uid || 'usr_moti_demo_01';
               const raw = await readSecureData<{ subscriptions?: unknown[]; payments?: unknown[]; activities?: unknown[] }>(userId);
-              let data = { subscriptions: [], payments: [], activities: [] };
+              const data: { subscriptions: unknown[]; payments: unknown[]; activities: unknown[] } = { subscriptions: [], payments: [], activities: [] };
               if (raw) {
                 data = {
                   subscriptions: Array.isArray(raw.subscriptions) ? raw.subscriptions : [],
