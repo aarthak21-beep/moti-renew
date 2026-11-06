@@ -56,7 +56,21 @@ async function profileForUser(authUser: any): Promise<UserProfile> {
 }
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(() => {
+    // Restore the locally saved profile so language/theme remain selected
+    // in local-first mode and immediately appear on the next app launch.
+    try {
+      const saved = localStorage.getItem('moti_renew_user');
+      if (!saved) return null;
+      const profile = JSON.parse(saved) as UserProfile;
+      if (!profile || typeof profile.uid !== 'string') return null;
+      if (!['en', 'hi', 'mr'].includes(profile.language)) profile.language = 'en';
+      if (!['light', 'dark'].includes(profile.theme)) profile.theme = 'light';
+      return profile;
+    } catch {
+      return null;
+    }
+  });
   const [loading, setLoading] = useState(appwriteConfigured);
 
   useEffect(() => {
