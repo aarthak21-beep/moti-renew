@@ -21,12 +21,9 @@
   <h1>MOTI Renew · License Admin</h1>
   <p>Manage customer licenses. Keep the admin token private.</p>
   <section class="card" id="settings">
-    <div class="grid">
-      <div><label for="api">Worker API URL</label><input id="api" placeholder="https://moti-renew-license.<account>.workers.dev"></div>
-      <div><label for="token">Admin token</label><input id="token" type="password" autocomplete="off" placeholder="Paste admin token"></div>
-    </div>
-    <div class="actions" style="margin-top:12px"><button id="connect">Connect</button><button class="secondary" id="forget">Forget token</button></div>
-    <div id="status" class="status" role="status">Enter your Worker URL and admin token.</div>
+    <div><label for="token">Admin password</label><input id="token" type="password" autocomplete="current-password" placeholder="Enter admin password"></div>
+    <div class="actions" style="margin-top:12px"><button id="connect">Unlock Admin Panel</button></div>
+    <div id="status" class="status" role="status">Enter your admin password to continue.</div>
   </section>
   <section class="card hidden" id="create">
     <h2>Create customer license</h2>
@@ -45,7 +42,7 @@
 <script>
 (() => {
   const $ = id => document.getElementById(id);
-  let api = "";
+  const api = "https://moti-renew-license-api.motidiagnostics.workers.dev";
   let token = "";
   const say = (message, bad = false) => { $("status").textContent = message; $("status").style.background = bad ? "#fef2f2" : "#eff6ff"; $("status").style.color = bad ? "#991b1b" : "#1e40af"; };
   const request = async (path, options = {}) => {
@@ -75,12 +72,11 @@
     }
   };
   $("connect").onclick = async () => {
-    api = $("api").value.trim(); token = $("token").value.trim();
-    if (!api || !token) return say("Worker URL and admin token are required.",true);
+    token = $("token").value.trim();
+    if (!token) return say("Admin password is required.",true);
     try { await load(); $("create").classList.remove("hidden"); $("list").classList.remove("hidden"); say("Connected. License list loaded."); }
     catch (error) { say(error.message,true); }
   };
-  $("forget").onclick = () => { $("token").value = ""; token = ""; $("create").classList.add("hidden"); $("list").classList.add("hidden"); say("Admin token cleared from this page."); };
   $("refresh").onclick = async () => { try { await load(); say("License list refreshed."); } catch (error) { say(error.message,true); } };
   $("make").onclick = async () => {
     const customerName = $("customer").value.trim();
