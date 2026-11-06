@@ -6,7 +6,7 @@ import {
 import { useAuth } from './AuthContext';
 import { calculateNextRenewal, getDaysUntil } from '../utils/dateUtils';
 import { getMonthlyEquivalent, getYearlyEquivalent } from '../utils/currencyUtils';
-import { supabase } from '../lib/supabase';
+import { appwriteConfigured, APPWRITE_DATABASE_ID, APPWRITE_TABLES, tablesDB, Query, ownerPermissions } from '../lib/appwrite';
 
 interface SubscriptionContextType {
   subscriptions: Subscription[];
@@ -59,7 +59,7 @@ const SubscriptionContext = createContext<SubscriptionContextType | undefined>(u
 export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const currentUserId = user?.uid || 'usr_moti_demo_01';
-  const isRealUser = Boolean(supabase && user && !user.uid.startsWith('usr_'));
+  const isRealUser = Boolean(appwriteConfigured && user && !user.uid.startsWith('usr_'));
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [payments, setPayments] = useState<PaymentRecord[]>([]);
   const [activities, setActivities] = useState<ActivityLog[]>([]);
@@ -72,16 +72,18 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setLoading(true);
       if (isRealUser && supabase && user) {
         const [subs, pays, acts] = await Promise.all([
-          supabase.from('subscriptions').select('data').eq('user_id', user.uid),
-          supabase.from('payments').select('data').eq('user_id', user.uid),
-          supabase.from('activities').select('data').eq('user_id', user.uid),
+          tablesDB.listRows(APPWRITE_DATABASE_ID, APPWRITE_TABLES.subscriptions, [Query.equal('userId', user.uid), Query.limit(100)]),
+          tablesDB.listRows(APPWRITE_DATABASE_ID, APPWRITE_TABLES.payments, [Query.equal('userId', user.uid), Query.limit(100)]),
+          tablesDB.listRows(APPWRITE_DATABASE_ID, APPWRITE_TABLES.activities, [Query.equal('userId', user.uid), Query.limit(100)]),
         ]);
-        const error = subs.error || pays.error || acts.error;
-        if (error) console.error('Supabase data load failed:', error.message);
+        const unpack = (rows: any[]) => rows.map(row => {
+          try { return typeof row.data === 'string' ? JSON.parse(row.data) : row.data; }
+          catch { console.error('Could not parse an Appwrite data row:', row.$id); return null; }
+        }).filter(Boolean);
         if (!cancelled) {
-          setSubscriptions((subs.data || []).map((r: any) => r.data as Subscription));
-          setPayments((pays.data || []).map((r: any) => r.data as PaymentRecord));
-          setActivities((acts.data || []).map((r: any) => r.data as ActivityLog));
+          setSubscriptions(unpack(subs.rows) as Subscription[]);
+          setPayments(unpack(pays.rows) as PaymentRecord[]);
+          setActivities(unpack(acts.rows) as ActivityLog[]);
         }
       } else {
         const saved = localStorage.getItem(`moti_renew_data_${currentUserId}`);
@@ -117,17 +119,20 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
   }, [subscriptions, payments, activities, currentUserId, loading, isRealUser]);
 
   const persist = async (table: 'subscriptions' | 'payments' | 'activities', record: any) => {
-    if (!isRealUser || !supabase || !user) return;
-    const { error } = await supabase.from(table).upsert({
-      user_id: user.uid, id: record.id, data: record,
-      ...(table === 'subscriptions' ? { updated_at: new Date().toISOString() } : {}),
-    });
-    if (error) throw error;
+    if (!isRealUser || !user) return;
+    const tableId = APPWRITE_TABLES[table];
+    const rowData = { userId: user.uid, id: record.id, data: JSON.stringify(record) };
+    try {
+      await tablesDB.updateRow(APPWRITE_DATABASE_ID, tableId, record.id, rowData);
+    } catch (error: any) {
+      if (error?.code !== 404) throw error;
+      await tablesDB.createRow(APPWRITE_DATABASE_ID, tableId, record.id, rowData, ownerPermissions(user.uid));
+    }
   };
   const remove = async (table: 'subscriptions' | 'payments', id: string) => {
-    if (!isRealUser || !supabase || !user) return;
-    const { error } = await supabase.from(table).delete().eq('user_id', user.uid).eq('id', id);
-    if (error) throw error;
+    if (!isRealUser || !user) return;
+    const tableId = APPWRITE_TABLES[table];
+    await tablesDB.deleteRow(APPWRITE_DATABASE_ID, tableId, id);
   };
 
   useEffect(() => {
