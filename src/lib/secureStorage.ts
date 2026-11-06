@@ -67,7 +67,7 @@ export function generateRecoveryKey(): string {
 }
 
 export async function setupLocalSecurity(userId: string, pin: string) {
-  if (!/^\\d{6,12}$/.test(pin)) throw new Error('PIN must be 6 to 12 digits.');
+  if (!/^\d{6,12}$/.test(pin)) throw new Error('PIN must be 6 to 12 digits.');
   const recoveryKey = generateRecoveryKey();
   const rawDataKey = randomBytes(32);
   const pinSalt = randomBytes(16);
@@ -101,10 +101,10 @@ export async function unlockLocalSecurity(userId: string, pin: string): Promise<
 }
 
 export async function recoverLocalSecurity(userId: string, recoveryKey: string, newPin: string) {
-  if (!/^\\d{6,12}$/.test(newPin)) throw new Error('PIN must be 6 to 12 digits.');
+  if (!/^\d{6,12}$/.test(newPin)) throw new Error('PIN must be 6 to 12 digits.');
   const meta = readMeta(userId);
   if (!meta) throw new Error('Security setup is missing.');
-  const recoveryWrappingKey = await deriveWrappingKey(recoveryKey.replace(/\\s/g, '').toUpperCase(), fromBase64(meta.recoverySalt));
+  const recoveryWrappingKey = await deriveWrappingKey(recoveryKey.replace(/\s/g, '').toUpperCase(), fromBase64(meta.recoverySalt));
   let rawDataKey: Uint8Array;
   try { rawDataKey = await unwrapRawKey(meta.recoveryWrappedKey, recoveryWrappingKey); }
   catch { throw new Error('Recovery Key चुकीची आहे. पुन्हा तपासा.'); }
