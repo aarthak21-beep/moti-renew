@@ -1,23 +1,7 @@
-import { BillingCycle, Currency } from '../types';
+import { BillingCycle } from '../types';
 
-export const CURRENCY_SYMBOLS: Record<Currency, string> = {
-  INR: '₹',
-  USD: '$',
-  EUR: '€',
-  GBP: '£'
-};
-
-export function formatCurrency(amount: number, currency: Currency = 'INR'): string {
-  const symbol = CURRENCY_SYMBOLS[currency] || '₹';
-  
-  if (currency === 'INR') {
-    return `${symbol}${new Intl.NumberFormat('en-IN', {
-      maximumFractionDigits: 2,
-      minimumFractionDigits: amount % 1 === 0 ? 0 : 2
-    }).format(amount)}`;
-  }
-
-  return `${symbol}${new Intl.NumberFormat('en-US', {
+export function formatCurrency(amount: number, _currency: 'INR' = 'INR'): string {
+  return `₹${new Intl.NumberFormat('en-IN', {
     maximumFractionDigits: 2,
     minimumFractionDigits: amount % 1 === 0 ? 0 : 2
   }).format(amount)}`;
