@@ -9,7 +9,7 @@ export type SubscriptionCategory =
 
 export type BillingCycle = 'Weekly' | 'Monthly' | 'Quarterly' | 'Yearly';
 
-export type Currency = 'INR' | 'USD' | 'EUR' | 'GBP';
+export type Currency = 'INR';
 
 export type SubscriptionStatus = 'Active' | 'Paused' | 'Expired' | 'Cancelled';
 
