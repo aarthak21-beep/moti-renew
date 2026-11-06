@@ -27,7 +27,6 @@ interface NavbarProps {
   onOpenAddModal: () => void;
   onOpenRecordPayment: (subId?: string) => void;
   onOpenWhatsApp: (subId: string) => void;
-  onOpenAuthModal: () => void;
   onToggleMobileMenu: () => void;
   isMobileMenuOpen: boolean;
 }
@@ -38,7 +37,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenAddModal: _onOpenAddModal,
   onOpenRecordPayment,
   onOpenWhatsApp,
-  onOpenAuthModal,
   onToggleMobileMenu,
   isMobileMenuOpen,
 }) => {
@@ -320,16 +318,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </div>
 
                 <div className="py-1">
-                  <button
-                    onClick={() => {
-                      setShowUserMenu(false);
-                      onOpenAuthModal();
-                    }}
-                    className="w-full text-left px-3.5 py-2 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60 flex items-center gap-2"
-                  >
-                    <User className="w-3.5 h-3.5 text-blue-500" />
-                    <span>Switch Account / Sign In</span>
-                  </button>
                   <button
                     onClick={() => {
                       setShowUserMenu(false);
