@@ -5,7 +5,6 @@ import {
   Sun, 
   Moon, 
   User, 
-  LogOut, 
   ShieldCheck, 
   ExternalLink,
   Clock,
@@ -40,7 +39,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onToggleMobileMenu,
   isMobileMenuOpen,
 }) => {
-  const { user, updateProfile, logout } = useAuth();
+  const { user, updateProfile } = useAuth();
   const { notifications, unreadNotificationCount, markNotificationAsRead, markAllNotificationsAsRead } = useSubscriptions();
 
   const [showNotifications, setShowNotifications] = useState(false);
@@ -340,18 +339,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </button>
                 </div>
 
-                <div className="pt-1 border-t border-slate-100 dark:border-slate-700/60">
-                  <button
-                    onClick={() => {
-                      setShowUserMenu(false);
-                      logout();
-                    }}
-                    className="w-full text-left px-3.5 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 flex items-center gap-2"
-                  >
-                    <LogOut className="w-3.5 h-3.5" />
-                    Sign Out
-                  </button>
-                </div>
               </div>
             )}
           </div>
