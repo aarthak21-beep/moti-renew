@@ -20,7 +20,7 @@ import { translations, Language } from '../i18n/translations';
 import { Currency } from '../types';
 
 export const SettingsView: React.FC = () => {
-  const { user, updateProfile, isFirebaseConnected } = useAuth();
+  const { user, updateProfile, isAppwriteConnected } = useAuth();
   const lang: Language = user?.language || 'en';
   const t = translations[lang] || translations.en;
 
@@ -190,7 +190,7 @@ export const SettingsView: React.FC = () => {
           <div className="flex items-center gap-2">
             <Database className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             <h2 className="text-sm font-bold text-slate-900 dark:text-white">
-              Database & Firebase Cloud Infrastructure
+              Database & Appwrite Cloud Infrastructure
             </h2>
           </div>
           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 flex items-center gap-1">
@@ -203,7 +203,7 @@ export const SettingsView: React.FC = () => {
           <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800 space-y-1">
             <span className="text-slate-400 block text-[11px] font-semibold">Persistence Layer</span>
             <span className="font-bold text-slate-900 dark:text-white block">
-              {isFirebaseConnected ? 'Firebase Firestore Live' : 'Encrypted Local + Firestore Ready'}
+              {isAppwriteConnected ? 'Appwrite TablesDB Live' : 'Local Storage + Appwrite Ready'}
             </span>
             <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
               Multi-tenant isolated collections
@@ -216,7 +216,7 @@ export const SettingsView: React.FC = () => {
               Hardened (8 Pillars)
             </span>
             <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
-              firestore.rules verified
+              Appwrite row permissions
             </span>
           </div>
 
@@ -238,7 +238,7 @@ export const SettingsView: React.FC = () => {
           </div>
           <p className="leading-relaxed text-[11px]">
             Data is bound to the current authenticated user identity (<code>{user?.uid}</code>). 
-            Even in offline or preview environments, subscriptions and payment records are preserved in full across page reloads and browser sessions. When Firebase is provisioned via the AI Studio Firebase Setup workflow, records automatically synchronize to Cloud Firestore.
+            Even in offline or preview environments, subscriptions and payment records are preserved in full across page reloads and browser sessions. When Appwrite is configured, records synchronize to Appwrite TablesDB.
           </p>
         </div>
       </div>
