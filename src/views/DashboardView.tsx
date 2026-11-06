@@ -472,7 +472,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <span>WhatsApp Reminder</span>
             </div>
             <p className="text-xs text-emerald-900/80 dark:text-emerald-200/80 leading-relaxed">
-              तयार केलेला रिन्यूअल किंवा पेमेंट मेसेज WhatsApp मध्ये उघडा आणि स्वतः तपासून पाठवा.
+              Open the prepared renewal or payment message in WhatsApp, review it, and send it.
             </p>
             <button
               onClick={() => onNavigateTab('reminders')}
