@@ -62,21 +62,23 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-[radial-gradient(ellipse_at_top_left,_#ccfbf1_0%,_#f0fdfa_32%,_#f8fafc_72%)] dark:bg-[radial-gradient(ellipse_at_top_left,_#134e4a_0%,_#0f172a_55%,_#020617_100%)] flex items-center justify-center p-4">
+      <div className="relative w-full max-w-md overflow-hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-[2rem] shadow-[0_28px_90px_-25px_rgba(15,118,110,0.38)] border border-white dark:border-slate-700 p-7 sm:p-8 animate-in zoom-in-95 duration-200">
+        <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-teal-500 via-cyan-400 to-emerald-400" />
         
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-xs">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal-600 to-emerald-400 text-white flex items-center justify-center font-black text-sm shadow-lg shadow-teal-600/25 ring-4 ring-teal-50 dark:ring-teal-950">
               MR
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-teal-600 dark:text-teal-400">MOTI TECHNOLOGIES</p>
+              <h3 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">
                 {mode === 'signin' ? t.auth.signIn : mode === 'signup' ? t.auth.signUp : t.auth.resetPassword}
               </h3>
-              <p className="text-[11px] text-slate-400">
-                Moti Renew • Moti Technologies
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Moti Renew <span className="text-teal-500">•</span> Stay ahead of every renewal
               </p>
             </div>
           </div>
@@ -88,8 +90,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           </button>}
         </div>
 
+        <div className="mt-7 mb-6">
+          <p className="text-2xl sm:text-[1.7rem] leading-tight font-extrabold tracking-tight text-slate-900 dark:text-white">
+            Your renewals, <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-400">under control.</span>
+          </p>
+          <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+            Sign in to manage subscriptions, track payments and never miss an important date.
+          </p>
+        </div>
+
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+        <form onSubmit={handleSubmit} className="mt-4 space-y-5">
           
           {error && (
             <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2 dark:bg-red-950/40 dark:border-red-900 dark:text-red-300">
@@ -117,7 +128,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Aarthak Sharma"
-                className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                className="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 transition"
               />
             </div>
           )}
@@ -133,7 +144,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 value={company}
                 onChange={(e) => setCompany(e.target.value)}
                 placeholder="e.g. Moti Technologies"
-                className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                className="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 transition"
               />
             </div>
           )}
@@ -153,7 +164,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
               placeholder="e.g. moti_admin"
               autoCapitalize="none"
               autoCorrect="off"
-              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              className="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 transition"
             />
           </div>
 
@@ -172,7 +183,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                className="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 transition"
               />
             </div>
           )}
@@ -180,7 +191,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 px-4 text-xs font-bold rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20 disabled:opacity-50 transition cursor-pointer"
+            className="w-full py-3.5 px-4 text-sm font-extrabold rounded-xl bg-gradient-to-r from-teal-700 to-emerald-500 hover:from-teal-800 hover:to-emerald-600 text-white shadow-lg shadow-teal-600/20 disabled:opacity-50 transition cursor-pointer"
           >
             {loading 
               ? 'Processing...' 
@@ -213,6 +224,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           </div>
         </form>
 
+        <div className="mt-7 pt-5 border-t border-slate-100 dark:border-slate-800 text-center">
+          <p className="text-[10px] font-medium tracking-wide text-slate-400 dark:text-slate-500">
+            Developed by <span className="font-extrabold text-slate-600 dark:text-slate-300">MOTI TECHNOLOGIES</span>
+          </p>
+        </div>
       </div>
     </div>
   );
