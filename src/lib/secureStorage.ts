@@ -167,7 +167,7 @@ export async function restoreEncryptedBackup(userId: string, backup: any, secret
     throw new Error('This is not a supported encrypted MOTI Renew backup.');
   }
   const meta = backup.security as SecurityMeta;
-  const normalizedSecret = secret.trim().replace(/\\s/g, '').toUpperCase();
+  const normalizedSecret = secret.trim().replace(/\s/g, '').toUpperCase();
   let rawDataKey: Uint8Array;
   let method: 'pin' | 'recovery';
   try {
