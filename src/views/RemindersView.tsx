@@ -39,7 +39,7 @@ export const RemindersView: React.FC<RemindersViewProps> = ({
   const [selectedSubId, setSelectedSubId] = useState<string>('');
   const [targetPhone, setTargetPhone] = useState<string>('');
   const [recipientName, setRecipientName] = useState<string>('');
-  const [messageLang, setMessageLang] = useState<'en' | 'hi' | 'mr'>(lang);
+  const [messageLang, setMessageLang] = useState<'en' | 'hi'>(lang === 'hi' ? 'hi' : 'en');
   const [copied, setCopied] = useState<boolean>(false);
 
   useEffect(() => {
@@ -159,7 +159,7 @@ export const RemindersView: React.FC<RemindersViewProps> = ({
               <Globe className="w-3.5 h-3.5 text-slate-400" />
               Message Language
             </label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => setMessageLang('en')}
@@ -181,17 +181,6 @@ export const RemindersView: React.FC<RemindersViewProps> = ({
                 }`}
               >
                 🇮🇳 हिन्दी
-              </button>
-              <button
-                type="button"
-                onClick={() => setMessageLang('mr')}
-                className={`py-2 px-3 rounded-xl text-xs font-semibold border transition cursor-pointer ${
-                  messageLang === 'mr'
-                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
-                    : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
-                }`}
-              >
-                🇮🇳 मराठी
               </button>
             </div>
           </div>
