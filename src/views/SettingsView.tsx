@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { 
   User, 
   Building2, 
@@ -30,6 +30,12 @@ export const SettingsView: React.FC = () => {
   const [theme, setTheme] = useState<'light' | 'dark'>(user?.theme || 'light');
   const [savedMessage, setSavedMessage] = useState(false);
   const backupInputRef = useRef<HTMLInputElement>(null);
+
+  // Keep the Settings form in sync when language/theme are changed from the Navbar.
+  useEffect(() => {
+    setSelectedLang(user?.language || 'en');
+    setTheme(user?.theme || 'light');
+  }, [user?.language, user?.theme]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
