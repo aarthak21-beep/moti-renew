@@ -121,7 +121,7 @@ export const SettingsView: React.FC = () => {
                   throw new Error('This backup is old or unsupported. Please use a newer encrypted backup.');
                 }
                 if (!window.confirm('Restoring this backup will replace the current data. Do you want to continue?')) return;
-                const secret = window.prompt('Enter this backup's PIN or Recovery Key:');
+                const secret = window.prompt("Enter this backup's PIN or Recovery Key:");
                 if (!secret) return;
                 const userId = user?.uid || 'usr_moti_demo_01';
                 await restoreEncryptedBackup(userId, parsed, secret);
