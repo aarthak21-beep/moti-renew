@@ -8,9 +8,6 @@ import {
   MessageSquareText, 
   Settings, 
   PlusCircle, 
-  Sparkles,
-  ShieldCheck,
-  ChevronRight
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useSubscriptions } from '../context/SubscriptionContext';
@@ -115,33 +112,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </nav>
       </div>
 
-      {/* Footer Pro Badge & Branding */}
-      <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
-        <div className="p-3 rounded-xl bg-gradient-to-br from-slate-900 to-blue-950 text-white text-xs dark:from-slate-800 dark:to-slate-900 border border-slate-800">
-          <div className="flex items-center gap-1.5 text-blue-400 text-[11px] font-semibold mb-1">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Moti Enterprise Ready</span>
-          </div>
-          <p className="text-[11px] text-slate-300 leading-relaxed">
-            Direct WhatsApp API & Automated renewal webhooks.
-          </p>
-          <div 
-            onClick={() => handleSelectTab('settings')}
-            className="mt-2 text-[10px] text-blue-300 hover:text-white font-semibold flex items-center gap-1 cursor-pointer"
-          >
-            <span>View Integration Status</span>
-            <ChevronRight className="w-3 h-3" />
-          </div>
-        </div>
 
-        <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
-          <span className="flex items-center gap-1">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-            Encrypted ABAC
-          </span>
-          <span>v2.4</span>
-        </div>
-      </div>
     </div>
   );
 
