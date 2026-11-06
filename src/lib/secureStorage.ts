@@ -37,13 +37,13 @@ async function wrapRawKey(rawKey: Uint8Array, wrappingKey: CryptoKey): Promise<W
   return { iv: toBase64(iv), data: toBase64(new Uint8Array(encrypted)) };
 }
 
-async function unwrapRawKey(wrapped: WrappedKey, wrappingKey: CryptoKey): Promise<CryptoKey> {
+async function unwrapRawKey(wrapped: WrappedKey, wrappingKey: CryptoKey): Promise<Uint8Array> {
   const raw = await crypto.subtle.decrypt(
     { name: 'AES-GCM', iv: fromBase64(wrapped.iv) },
     wrappingKey,
     fromBase64(wrapped.data)
   );
-  return crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+  return new Uint8Array(raw);
 }
 
 function readMeta(userId: string): SecurityMeta | null {
@@ -92,7 +92,8 @@ export async function unlockLocalSecurity(userId: string, pin: string): Promise<
   if (!meta) throw new Error('Security setup is missing.');
   const wrappingKey = await deriveWrappingKey(pin, fromBase64(meta.pinSalt));
   try {
-    activeKey = await unwrapRawKey(meta.pinWrappedKey, wrappingKey);
+    const rawDataKey = await unwrapRawKey(meta.pinWrappedKey, wrappingKey);
+    activeKey = await crypto.subtle.importKey('raw', rawDataKey, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
     activeUserId = userId;
   } catch {
     throw new Error('Incorrect PIN. Please try again.');
@@ -104,10 +105,9 @@ export async function recoverLocalSecurity(userId: string, recoveryKey: string, 
   const meta = readMeta(userId);
   if (!meta) throw new Error('Security setup is missing.');
   const recoveryWrappingKey = await deriveWrappingKey(recoveryKey.replace(/\\s/g, '').toUpperCase(), fromBase64(meta.recoverySalt));
-  let dataKey: CryptoKey;
-  try { dataKey = await unwrapRawKey(meta.recoveryWrappedKey, recoveryWrappingKey); }
+  let rawDataKey: Uint8Array;
+  try { rawDataKey = await unwrapRawKey(meta.recoveryWrappedKey, recoveryWrappingKey); }
   catch { throw new Error('Recovery Key चुकीची आहे. पुन्हा तपासा.'); }
-  const rawDataKey = await crypto.subtle.exportKey('raw', dataKey);
   const pinSalt = randomBytes(16);
   const recoverySalt = randomBytes(16);
   const nextRecoveryKey = generateRecoveryKey();
@@ -117,11 +117,11 @@ export async function recoverLocalSecurity(userId: string, recoveryKey: string, 
     version: 1,
     pinSalt: toBase64(pinSalt),
     recoverySalt: toBase64(recoverySalt),
-    pinWrappedKey: await wrapRawKey(new Uint8Array(rawDataKey), pinKey),
-    recoveryWrappedKey: await wrapRawKey(new Uint8Array(rawDataKey), nextRecoveryWrappingKey),
+    pinWrappedKey: await wrapRawKey(rawDataKey, pinKey),
+    recoveryWrappedKey: await wrapRawKey(rawDataKey, nextRecoveryWrappingKey),
   };
   localStorage.setItem(META_PREFIX + userId, JSON.stringify(updated));
-  activeKey = dataKey;
+  activeKey = await crypto.subtle.importKey('raw', rawDataKey, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
   activeUserId = userId;
   return nextRecoveryKey;
 }
