@@ -208,7 +208,6 @@ export const SettingsView: React.FC = () => {
             >
               <option value="en">🇺🇸 English</option>
               <option value="hi">🇮🇳 हिन्दी (Hindi)</option>
-              <option value="mr">🇮🇳 मराठी (Marathi)</option>
             </select>
           </div>
 
