@@ -7,13 +7,8 @@ import {
   DollarSign, 
   Sun, 
   Moon, 
-  ShieldCheck, 
-  Database, 
   Check, 
   Save, 
-  Sparkles,
-  Server,
-  Key,
   Download,
   Upload,
   HardDrive
@@ -23,7 +18,7 @@ import { translations, Language } from '../i18n/translations';
 import { Currency } from '../types';
 
 export const SettingsView: React.FC = () => {
-  const { user, updateProfile, isAppwriteConnected } = useAuth();
+  const { user, updateProfile } = useAuth();
   const lang: Language = user?.language || 'en';
   const t = translations[lang] || translations.en;
 
@@ -280,65 +275,6 @@ export const SettingsView: React.FC = () => {
         </div>
 
       </form>
-
-      {/* Database & Cloud Architecture Status Panel */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-          <div className="flex items-center gap-2">
-            <Database className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-            <h2 className="text-sm font-bold text-slate-900 dark:text-white">
-              Database & Appwrite Cloud Infrastructure
-            </h2>
-          </div>
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 flex items-center gap-1">
-            <ShieldCheck className="w-3 h-3" />
-            Zero-Trust ABAC Active
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800 space-y-1">
-            <span className="text-slate-400 block text-[11px] font-semibold">Persistence Layer</span>
-            <span className="font-bold text-slate-900 dark:text-white block">
-              {isAppwriteConnected ? 'Appwrite TablesDB Live' : 'Local Storage + Appwrite Ready'}
-            </span>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
-              Multi-tenant isolated collections
-            </span>
-          </div>
-
-          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800 space-y-1">
-            <span className="text-slate-400 block text-[11px] font-semibold">Security Rules Status</span>
-            <span className="font-bold text-emerald-600 dark:text-emerald-400 block">
-              Hardened (8 Pillars)
-            </span>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
-              Appwrite row permissions
-            </span>
-          </div>
-
-          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800 space-y-1">
-            <span className="text-slate-400 block text-[11px] font-semibold">WhatsApp Gateway</span>
-            <span className="font-bold text-blue-600 dark:text-blue-400 block">
-              Hybrid Ready
-            </span>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
-              Direct WA Web + Cloud API stub
-            </span>
-          </div>
-        </div>
-
-        <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400 space-y-2">
-          <div className="flex items-center gap-1.5 font-bold text-slate-900 dark:text-white">
-            <Server className="w-3.5 h-3.5 text-blue-600" />
-            <span>Architecture & Security Specification</span>
-          </div>
-          <p className="leading-relaxed text-[11px]">
-            Data is bound to the current authenticated user identity (<code>{user?.uid}</code>). 
-            Even in offline or preview environments, subscriptions and payment records are preserved in full across page reloads and browser sessions. When Appwrite is configured, records synchronize to Appwrite TablesDB.
-          </p>
-        </div>
-      </div>
 
       {/* About Moti Technologies Footer */}
       <div className="p-5 rounded-2xl bg-gradient-to-r from-slate-900 to-blue-950 text-white shadow-md border border-slate-800 space-y-2">
