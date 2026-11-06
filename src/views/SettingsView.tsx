@@ -16,6 +16,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { translations, Language } from '../i18n/translations';
 import { Currency } from '../types';
+import { readSecureData, writeSecureData } from '../lib/secureStorage';
 
 export const SettingsView: React.FC = () => {
   const { user, updateProfile } = useAuth();
@@ -75,22 +76,16 @@ export const SettingsView: React.FC = () => {
         <div className="flex flex-wrap gap-3">
           <button
             type="button"
-            onClick={() => {
+            onClick={async () => {
               const userId = user?.uid || 'usr_moti_demo_01';
-              const raw = localStorage.getItem(`moti_renew_data_${userId}`);
+              const raw = await readSecureData<{ subscriptions?: unknown[]; payments?: unknown[]; activities?: unknown[] }>(userId);
               let data = { subscriptions: [], payments: [], activities: [] };
               if (raw) {
-                try {
-                  const parsed = JSON.parse(raw);
-                  data = {
-                    subscriptions: Array.isArray(parsed.subscriptions) ? parsed.subscriptions : [],
-                    payments: Array.isArray(parsed.payments) ? parsed.payments : [],
-                    activities: Array.isArray(parsed.activities) ? parsed.activities : [],
-                  };
-                } catch {
-                  alert('Saved data could not be read. Please reload the app and try again.');
-                  return;
-                }
+                data = {
+                  subscriptions: Array.isArray(raw.subscriptions) ? raw.subscriptions : [],
+                  payments: Array.isArray(raw.payments) ? raw.payments : [],
+                  activities: Array.isArray(raw.activities) ? raw.activities : [],
+                };
               }
               const backup = {
                 app: 'MOTI Renew',
@@ -142,7 +137,7 @@ export const SettingsView: React.FC = () => {
                 }
                 if (!window.confirm('Restore this backup? Your current subscriptions, payments and activity on this device will be replaced.')) return;
                 const userId = user?.uid || 'usr_moti_demo_01';
-                localStorage.setItem(`moti_renew_data_${userId}`, JSON.stringify(data));
+                await writeSecureData(userId, data);
                 alert('Backup restored. The app will now reload.');
                 window.location.reload();
               } catch (error) {
