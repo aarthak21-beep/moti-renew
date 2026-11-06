@@ -153,6 +153,45 @@ export async function writeSecureData(userId: string, value: unknown): Promise<v
   }));
 }
 
+export async function exportEncryptedBackup(userId: string) {
+  if (!activeKey || activeUserId !== userId) throw new Error('App is locked.');
+  const meta = readMeta(userId);
+  const encryptedData = localStorage.getItem(DATA_PREFIX + userId);
+  if (!meta || !encryptedData) throw new Error('No secured data is available to back up.');
+  return { app: 'MOTI Renew', formatVersion: 2, createdAt: new Date().toISOString(), security: meta, encryptedData: JSON.parse(encryptedData) };
+}
+
+export async function restoreEncryptedBackup(userId: string, backup: any, secret: string): Promise<'pin' | 'recovery'> {
+  if (backup?.app !== 'MOTI Renew' || backup?.formatVersion !== 2 || backup?.security?.version !== 1 ||
+      typeof backup?.encryptedData?.iv !== 'string' || typeof backup?.encryptedData?.data !== 'string') {
+    throw new Error('This is not a supported encrypted MOTI Renew backup.');
+  }
+  const meta = backup.security as SecurityMeta;
+  const normalizedSecret = secret.trim().replace(/\\s/g, '').toUpperCase();
+  let rawDataKey: Uint8Array;
+  let method: 'pin' | 'recovery';
+  try {
+    const wrappingKey = await deriveWrappingKey(secret.trim(), fromBase64(meta.pinSalt));
+    rawDataKey = await unwrapRawKey(meta.pinWrappedKey, wrappingKey);
+    method = 'pin';
+  } catch {
+    try {
+      const wrappingKey = await deriveWrappingKey(normalizedSecret, fromBase64(meta.recoverySalt));
+      rawDataKey = await unwrapRawKey(meta.recoveryWrappedKey, wrappingKey);
+      method = 'recovery';
+    } catch {
+      throw new Error('हा Backup उघडण्यासाठी दिलेला PIN किंवा Recovery Key चुकीचा आहे.');
+    }
+  }
+  const importedKey = await crypto.subtle.importKey('raw', rawDataKey, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+  await crypto.subtle.decrypt({ name: 'AES-GCM', iv: fromBase64(backup.encryptedData.iv) }, importedKey, fromBase64(backup.encryptedData.data));
+  localStorage.setItem(META_PREFIX + userId, JSON.stringify(meta));
+  localStorage.setItem(DATA_PREFIX + userId, JSON.stringify(backup.encryptedData));
+  activeKey = importedKey;
+  activeUserId = userId;
+  return method;
+}
+
 export async function migrateLegacyData(userId: string): Promise<unknown | null> {
   const existingEncrypted = localStorage.getItem(DATA_PREFIX + userId);
   if (existingEncrypted) return readSecureData(userId);
