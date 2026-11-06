@@ -66,9 +66,29 @@
       const actions = document.createElement("td"); const wrap = document.createElement("div"); wrap.className = "actions";
       const toggle = document.createElement("button"); toggle.className = item.status === "active" ? "danger" : "secondary"; toggle.textContent = item.status === "active" ? "Suspend" : "Activate";
       toggle.onclick = async () => { await request("/api/admin/licenses/" + item.id,{method:"PATCH",body:JSON.stringify({status:item.status === "active" ? "suspended" : "active"})}); await load(); };
+      const extend = document.createElement("button"); extend.className = "secondary"; extend.textContent = "Edit expiry";
+      extend.onclick = async () => {
+        const current = new Date(item.expires_at);
+        const pad = value => String(value).padStart(2, "0");
+        const localValue = current.getFullYear() + "-" + pad(current.getMonth() + 1) + "-" + pad(current.getDate()) + "T" + pad(current.getHours()) + ":" + pad(current.getMinutes());
+        const entered = prompt("Enter new expiry date and time (YYYY-MM-DDTHH:mm, local time):", localValue);
+        if (entered === null) return;
+        const nextExpiry = new Date(entered);
+        if (!/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$/.test(entered) || Number.isNaN(nextExpiry.getTime())) {
+          say("Invalid date. Use YYYY-MM-DDTHH:mm.", true); return;
+        }
+        if (nextExpiry.getTime() <= Date.now()) {
+          say("Expiry must be in the future.", true); return;
+        }
+        try {
+          await request("/api/admin/licenses/" + item.id, {method:"PATCH", body:JSON.stringify({expiresAt:nextExpiry.toISOString(), status:"active"})});
+          say("Expiry updated and license activated.");
+          await load();
+        } catch (error) { say(error.message, true); }
+      };
       const reset = document.createElement("button"); reset.className = "secondary"; reset.textContent = "Reset device";
       reset.onclick = async () => { if(confirm("Allow this license to activate on a new device?")) { await request("/api/admin/licenses/" + item.id,{method:"PATCH",body:JSON.stringify({resetDevice:true})}); await load(); } };
-      wrap.append(toggle,reset); actions.append(wrap); tr.append(first,status,expiry,device,actions); $("rows").append(tr);
+      wrap.append(toggle,extend,reset); actions.append(wrap); tr.append(first,status,expiry,device,actions); $("rows").append(tr);
     }
   };
   $("connect").onclick = async () => {
