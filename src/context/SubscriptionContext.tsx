@@ -7,7 +7,6 @@ import { useAuth } from './AuthContext';
 import { calculateNextRenewal, getDaysUntil } from '../utils/dateUtils';
 import { getMonthlyEquivalent, getYearlyEquivalent } from '../utils/currencyUtils';
 import { migrateLegacyData, writeSecureData } from '../lib/secureStorage';
-import { appwriteConfigured, APPWRITE_DATABASE_ID, APPWRITE_TABLES, tablesDB, Query, ownerPermissions } from '../lib/appwrite';
 
 interface SubscriptionContextType {
   subscriptions: Subscription[];
@@ -60,7 +59,6 @@ const SubscriptionContext = createContext<SubscriptionContextType | undefined>(u
 export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const currentUserId = user?.uid || 'usr_moti_demo_01';
-  const isRealUser = Boolean(appwriteConfigured && user && !user.uid.startsWith('usr_'));
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [payments, setPayments] = useState<PaymentRecord[]>([]);
   const [activities, setActivities] = useState<ActivityLog[]>([]);
@@ -71,80 +69,36 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     let cancelled = false;
     const load = async () => {
       setLoading(true);
-      if (isRealUser && user) {
-        try {
-          const [subs, pays, acts] = await Promise.all([
-            tablesDB.listRows(APPWRITE_DATABASE_ID, APPWRITE_TABLES.subscriptions, [Query.equal('userId', user.uid), Query.limit(100)]),
-            tablesDB.listRows(APPWRITE_DATABASE_ID, APPWRITE_TABLES.payments, [Query.equal('userId', user.uid), Query.limit(100)]),
-            tablesDB.listRows(APPWRITE_DATABASE_ID, APPWRITE_TABLES.activities, [Query.equal('userId', user.uid), Query.limit(100)]),
-          ]);
-          const unpack = (rows: any[]) => rows.map(row => {
-            try { return typeof row.data === 'string' ? JSON.parse(row.data) : row.data; }
-            catch { console.error('Could not parse an Appwrite data row:', row.$id); return null; }
-          }).filter(Boolean);
-          if (!cancelled) {
-            setSubscriptions(unpack(subs.rows) as Subscription[]);
-            setPayments(unpack(pays.rows) as PaymentRecord[]);
-            setActivities(unpack(acts.rows) as ActivityLog[]);
-          }
-        } catch (error) {
-          console.error('Appwrite data load failed:', error);
-          if (!cancelled) { setSubscriptions([]); setPayments([]); setActivities([]); }
+      try {
+        const parsed = await migrateLegacyData(currentUserId) as { subscriptions?: Subscription[]; payments?: PaymentRecord[]; activities?: ActivityLog[] } | null;
+        if (!cancelled && parsed) {
+          setSubscriptions(parsed.subscriptions || []);
+          setPayments(parsed.payments || []);
+          setActivities(parsed.activities || []);
+        } else if (!cancelled) {
+          setSubscriptions(demoSubscriptions.map(s => ({ ...s, userId: currentUserId })));
+          setPayments(demoPayments.map(p => ({ ...p, userId: currentUserId })));
+          setActivities(demoActivities.map(a => ({ ...a, userId: currentUserId })));
         }
-      } else {
-        try {
-          const parsed = await migrateLegacyData(currentUserId) as { subscriptions?: Subscription[]; payments?: PaymentRecord[]; activities?: ActivityLog[] } | null;
-          if (!cancelled && parsed) {
-            setSubscriptions(parsed.subscriptions || []);
-            setPayments(parsed.payments || []);
-            setActivities(parsed.activities || []);
-          } else if (!cancelled) {
-            setSubscriptions(demoSubscriptions.map(s => ({ ...s, userId: currentUserId })));
-            setPayments(demoPayments.map(p => ({ ...p, userId: currentUserId })));
-            setActivities(demoActivities.map(a => ({ ...a, userId: currentUserId })));
-          }
-        } catch (error) {
-          console.error('Encrypted local data could not be loaded:', error);
-          if (!cancelled) { setSubscriptions([]); setPayments([]); setActivities([]); }
-        }
+      } catch (error) {
+        console.error('Encrypted local data could not be loaded:', error);
+        if (!cancelled) { setSubscriptions([]); setPayments([]); setActivities([]); }
       }
       if (!cancelled) setLoading(false);
     };
     void load();
     return () => { cancelled = true; };
-  }, [currentUserId, isRealUser]);
+  }, [currentUserId]);
 
   useEffect(() => {
-    if (!loading && !isRealUser && currentUserId) {
+    if (!loading && currentUserId) {
       void writeSecureData(currentUserId, { subscriptions, payments, activities }).catch(error => console.error('Encrypted local save failed:', error));
     }
-  }, [subscriptions, payments, activities, currentUserId, loading, isRealUser]);
+  }, [subscriptions, payments, activities, currentUserId, loading]);
 
-  const persist = async (table: 'subscriptions' | 'payments' | 'activities', record: any) => {
-    if (!isRealUser || !user) return;
-    const tableId = APPWRITE_TABLES[table];
-    const rowData: Record<string, unknown> = { userId: user.uid, id: record.id, data: JSON.stringify(record) };
-    if (table === 'subscriptions') {
-      rowData.planName = record.serviceName;
-      rowData.planPrice = record.amount;
-      rowData.billingCycle = record.billingCycle;
-      rowData.startDate = record.startDate ? new Date(record.startDate + 'T00:00:00.000Z').toISOString() : new Date().toISOString();
-      rowData.endDate = record.renewalDate ? new Date(record.renewalDate + 'T00:00:00.000Z').toISOString() : new Date().toISOString();
-      rowData.status = record.status;
-      rowData.notes = record.notes || '';
-    }
-    try {
-      await tablesDB.updateRow(APPWRITE_DATABASE_ID, tableId, record.id, rowData);
-    } catch (error: any) {
-      if (error?.code !== 404) throw error;
-      await tablesDB.createRow(APPWRITE_DATABASE_ID, tableId, record.id, rowData, ownerPermissions(user.uid));
-    }
-  };
-  const remove = async (table: 'subscriptions' | 'payments', id: string) => {
-    if (!isRealUser || !user) return;
-    const tableId = APPWRITE_TABLES[table];
-    await tablesDB.deleteRow(APPWRITE_DATABASE_ID, tableId, id);
-  };
+  // All customer records stay encrypted in this device's browser storage.
+  const persist = async (_table: 'subscriptions' | 'payments' | 'activities', _record: any) => {};
+  const remove = async (_table: 'subscriptions' | 'payments', _id: string) => {};
 
   useEffect(() => {
     if (!loading) {
