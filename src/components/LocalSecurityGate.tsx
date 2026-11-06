@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { hasLocalSecurity, setupLocalSecurity, unlockLocalSecurity, recoverLocalSecurity } from '../lib/secureStorage';
 
 type Stage = 'setup' | 'unlock' | 'recover' | 'show-recovery' | 'ready';
 
 export const LocalSecurityGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const userId = user?.uid || 'usr_moti_demo_01';
   const [stage, setStage] = useState<Stage>(() => hasLocalSecurity(userId) ? 'unlock' : 'setup');
+  useEffect(() => { setStage(hasLocalSecurity(userId) ? 'unlock' : 'setup'); resetFields(); }, [userId]);
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
   const [recoveryInput, setRecoveryInput] = useState('');
@@ -49,6 +50,7 @@ export const LocalSecurityGate: React.FC<{ children: React.ReactNode }> = ({ chi
     finally { setBusy(false); }
   };
 
+  if (authLoading) return <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-600 dark:bg-slate-950 dark:text-slate-300">Loading...</div>;
   if (stage === 'ready') return <>{children}</>;
 
   const inputClass = 'w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-center text-lg tracking-[0.25em] text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white';
