@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { 
   User, 
   Building2, 
@@ -13,7 +13,10 @@ import {
   Save, 
   Sparkles,
   Server,
-  Key
+  Key,
+  Download,
+  Upload,
+  HardDrive
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { translations, Language } from '../i18n/translations';
@@ -63,6 +66,99 @@ export const SettingsView: React.FC = () => {
           <span>Settings saved and synchronized successfully!</span>
         </div>
       )}
+
+      {/* Local backup and restore */}
+      <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+        <div className="flex items-center gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
+          <HardDrive className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+          <h2 className="text-sm font-bold text-slate-900 dark:text-white">Backup & Restore</h2>
+        </div>
+        <p className="text-xs text-slate-500 dark:text-slate-400">
+          Export your subscriptions, payment history and activity as a file. Keep the file somewhere safe. Restore replaces the current records on this device.
+        </p>
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              const userId = user?.uid || 'usr_moti_demo_01';
+              const raw = localStorage.getItem(`moti_renew_data_${userId}`);
+              let data = { subscriptions: [], payments: [], activities: [] };
+              if (raw) {
+                try {
+                  const parsed = JSON.parse(raw);
+                  data = {
+                    subscriptions: Array.isArray(parsed.subscriptions) ? parsed.subscriptions : [],
+                    payments: Array.isArray(parsed.payments) ? parsed.payments : [],
+                    activities: Array.isArray(parsed.activities) ? parsed.activities : [],
+                  };
+                } catch {
+                  alert('Saved data could not be read. Please reload the app and try again.');
+                  return;
+                }
+              }
+              const backup = {
+                app: 'MOTI Renew',
+                formatVersion: 1,
+                createdAt: new Date().toISOString(),
+                data,
+              };
+              const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = `moti-renew-backup-${new Date().toISOString().slice(0, 10)}.json`;
+              document.body.appendChild(link);
+              link.click();
+              link.remove();
+              URL.revokeObjectURL(url);
+            }}
+            className="px-4 py-2 text-xs font-semibold rounded-xl bg-blue-600 hover:bg-blue-700 text-white transition flex items-center gap-2"
+          >
+            <Download className="w-4 h-4" /> Download Backup
+          </button>
+          <button
+            type="button"
+            onClick={() => backupInputRef.current?.click()}
+            className="px-4 py-2 text-xs font-semibold rounded-xl border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition flex items-center gap-2"
+          >
+            <Upload className="w-4 h-4" /> Restore from Backup
+          </button>
+          <input
+            ref={backupInputRef}
+            type="file"
+            accept="application/json,.json"
+            className="hidden"
+            onChange={async (event) => {
+              const file = event.target.files?.[0];
+              event.target.value = '';
+              if (!file) return;
+              if (file.size > 25 * 1024 * 1024) {
+                alert('Backup file is too large (maximum 25 MB).');
+                return;
+              }
+              try {
+                const parsed = JSON.parse(await file.text());
+                const data = parsed?.data;
+                if (parsed?.app !== 'MOTI Renew' || parsed?.formatVersion !== 1 ||
+                    !data || !Array.isArray(data.subscriptions) ||
+                    !Array.isArray(data.payments) || !Array.isArray(data.activities)) {
+                  throw new Error('This is not a supported MOTI Renew backup file.');
+                }
+                if (!window.confirm('Restore this backup? Your current subscriptions, payments and activity on this device will be replaced.')) return;
+                const userId = user?.uid || 'usr_moti_demo_01';
+                localStorage.setItem(`moti_renew_data_${userId}`, JSON.stringify(data));
+                alert('Backup restored. The app will now reload.');
+                window.location.reload();
+              } catch (error) {
+                alert(error instanceof Error ? error.message : 'Could not restore this backup file.');
+              }
+            }}
+          />
+        </div>
+        <p className="text-[11px] text-amber-700 dark:text-amber-300">
+          Backup files contain business and payment information. Store them securely and do not share them publicly.
+        </p>
+      </div>
 
       {/* Profile Form */}
       <form onSubmit={handleSave} className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-5">
