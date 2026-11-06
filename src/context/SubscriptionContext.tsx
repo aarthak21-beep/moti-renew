@@ -103,7 +103,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
           } catch {
             if (!cancelled) { setSubscriptions([]); setPayments([]); setActivities([]); }
           }
-        } else if (!cancelled && user) {
+        } else if (!cancelled) {
           setSubscriptions(demoSubscriptions.map(s => ({ ...s, userId: currentUserId })));
           setPayments(demoPayments.map(p => ({ ...p, userId: currentUserId })));
           setActivities(demoActivities.map(a => ({ ...a, userId: currentUserId })));
