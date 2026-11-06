@@ -4,11 +4,6 @@ import { UserProfile } from '../types';
 interface AuthContextType {
   user: UserProfile | null;
   loading: boolean;
-  loginDemo: (name?: string, email?: string) => void;
-  loginWithEmail: (userId: string, password?: string) => Promise<boolean>;
-  signupWithEmail: (name: string, userId: string, company?: string, password?: string) => Promise<boolean>;
-  loginWithGoogle: () => Promise<boolean>;
-  logout: () => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
 }
 
@@ -55,17 +50,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(current => current ? { ...current, ...updates } : { ...createDefaultProfile(), ...updates });
   };
 
-  // Authentication is intentionally disabled: every customer uses local device storage.
-  const loginDemo = (_name?: string, _email?: string) => {};
-  const loginWithEmail = async (_userId: string, _password = '') => false;
-  const signupWithEmail = async (_name: string, _userId: string, _company = '', _password = '') => false;
-  const loginWithGoogle = async () => false;
-  const logout = async () => {};
-
   return (
     <AuthContext.Provider value={{
-      user, loading: false, loginDemo, loginWithEmail, signupWithEmail,
-      loginWithGoogle, logout, updateProfile,
+      user, loading: false, updateProfile,
     }}>
       {children}
     </AuthContext.Provider>
