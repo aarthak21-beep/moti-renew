@@ -3,7 +3,6 @@ import {
   BarChart3, 
   TrendingUp, 
   Download, 
-  DollarSign, 
   PieChart, 
   Layers, 
   Calendar,
@@ -99,7 +98,7 @@ export const AnalyticsView: React.FC = () => {
       </div>
 
       {/* 4 Financial KPI Highlight Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         
         <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
           <div className="flex items-center justify-between text-slate-400 mb-2">
@@ -128,21 +127,6 @@ export const AnalyticsView: React.FC = () => {
           </div>
           <p className="text-[11px] text-slate-400 mt-1">
             Estimated 12-month commitment
-          </p>
-        </div>
-
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-          <div className="flex items-center justify-between text-slate-400 mb-2">
-            <span className="text-xs font-semibold">Foreign SaaS (USD)</span>
-            <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400">
-              <DollarSign className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">
-            ${metrics.monthlyExpenseUSD} <span className="text-xs font-medium text-slate-400">/mo</span>
-          </div>
-          <p className="text-[11px] text-slate-400 mt-1">
-            ${metrics.yearlyExpenseUSD} USD/year projected
           </p>
         </div>
 
